@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: InnovatEPAM Portal Phase 1 API
+  version: 1.0.0
+  description: Contracts for idea submission, retrieval, and admin evaluation workflows.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/ideas:
+    get:
+      summary: List current submitter's ideas
+      tags: [Ideas]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Ideas for authenticated submitter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new idea
+      tags: [Ideas]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, description, category]
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                description:
+                  type: string
+                  minLength: 10
+                category:
+                  type: string
+                attachment:
+                  type: string
+                  format: binary
+                  description: Optional single file, max 10 MB, whitelist validated server-side.
+      responses:
+        '201':
+          description: Idea created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/ideas/{ideaId}:
+    get:
+      summary: Get one idea detail for owner or admin
+      tags: [Ideas]
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: ideaId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Idea detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/admin/ideas:
+    get:
+      summary: List all ideas for admin queue
+      tags: [Admin]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Full idea queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIdeaListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/admin/ideas/{ideaId}/status:
+    patch:
+      summary: Transition idea status (admin only)
+      tags: [Admin]
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: ideaId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toStatus]
+              properties:
+                toStatus:
+                  type: string
+                  enum: [under_review, accepted, rejected]
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Status transition recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaDetailResponse'
+        '400':
+          description: Validation or transition failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidTransition:
+                  value:
+                    ok: false
+                    error:
+                      code: INVALID_TRANSITION
+                      message: Cannot move directly from submitted to accepted.
+                missingComment:
+                  value:
+                    ok: false
+                    error:
+                      code: COMMENT_REQUIRED
+                      message: Comment is required when accepting or rejecting an idea.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+  responses:
+    Unauthorized:
+      description: Missing or invalid session
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated but lacks role permission
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Input validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    IdeaSummary:
+      type: object
+      required: [id, title, category, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [submitted, under_review, accepted, rejected]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Attachment:
+      type: object
+      required: [originalName, mimeType, sizeBytes, publicUrl]
+      properties:
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        sizeBytes:
+          type: integer
+        publicUrl:
+          type: string
+    IdeaDetail:
+      allOf:
+        - $ref: '#/components/schemas/IdeaSummary'
+        - type: object
+          required: [description]
+          properties:
+            description:
+              type: string
+            comment:
+              type: string
+              nullable: true
+            submitter:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+            attachment:
+              $ref: '#/components/schemas/Attachment'
+    IdeaListResponse:
+      type: object
+      required: [ok, data]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdeaSummary'
+    AdminIdeaListResponse:
+      type: object
+      required: [ok, data]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdeaDetail'
+    IdeaDetailResponse:
+      type: object
+      required: [ok, data]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/IdeaDetail'
+    ErrorResponse:
+      type: object
+      required: [ok, error]
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
