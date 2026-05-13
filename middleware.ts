@@ -8,22 +8,44 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const pathname = req.nextUrl.pathname
 
-  // Redirect unauthenticated users to login
-  if (!isLoggedIn && !pathname.startsWith('/login') && !pathname.startsWith('/register')) {
-    const loginUrl = new URL('/login', req.nextUrl.origin)
-    loginUrl.searchParams.set('callbackUrl', pathname)
-    return Response.redirect(loginUrl)
-  }
+  // Public routes (no authentication required)
+  const publicRoutes = [
+    '/login',
+    '/register',
+    '/api/auth/register',
+    '/api/auth/login',
+    '/api/auth/callback',
+    '/',
+  ]
 
-  // Redirect authenticated users away from auth pages
-  if (isLoggedIn && (pathname === '/login' || pathname === '/register')) {
-    return Response.redirect(new URL('/', req.nextUrl.origin))
-  }
+  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 
-  // Admin routes
-  if (pathname.startsWith('/admin')) {
-    if (!isLoggedIn || (req.auth?.user as any)?.role !== 'ADMIN') {
+  // If public route, allow access
+  if (isPublicRoute) {
+    // Redirect logged-in users away from auth pages (UI only, not API)
+    if (isLoggedIn && (pathname === '/login' || pathname === '/register')) {
       return Response.redirect(new URL('/', req.nextUrl.origin))
+    }
+    return
+  }
+
+  // Protected routes (authentication required)
+  const protectedRoutes = ['/ideas', '/admin', '/api/ideas', '/api/admin']
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+
+  if (isProtectedRoute) {
+    // Redirect unauthenticated users to login
+    if (!isLoggedIn) {
+      const loginUrl = new URL('/login', req.nextUrl.origin)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      return Response.redirect(loginUrl)
+    }
+
+    // Check admin access for /admin routes
+    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+      if ((req.auth?.user as any)?.role !== 'ADMIN') {
+        return Response.redirect(new URL('/', req.nextUrl.origin))
+      }
     }
   }
 })

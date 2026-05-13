@@ -2,64 +2,25 @@
  * Admin idea detail and evaluation page.
  */
 
-'use client'
-
-import { requireRole } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import EvaluationForm from './_components/evaluation-form'
 
 async function getIdea(ideaId: string) {
   return await ideaRepository.findById(ideaId)
 }
 
-export default function AdminIdeaDetailPage({
+export default async function AdminIdeaDetailPage({
   params,
 }: {
   params: { ideaId: string }
 }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const idea = await getIdea(params.ideaId)
 
-  // TODO: Server-side fetch and pass data as props
-  // For now using client-side approach
-
-  async function handleEvaluate(toStatus: string) {
-    setError('')
-    setLoading(true)
-
-    const comment = (document.getElementById('comment') as HTMLTextAreaElement)?.value
-
-    if (!comment?.trim()) {
-      setError('Comment is required')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/admin/ideas/${params.ideaId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ toStatus, comment }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error?.message || 'Failed to evaluate idea')
-        return
-      }
-
-      router.push('/admin/ideas')
-    } catch (err) {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  if (!idea) {
+    notFound()
   }
 
   return (
@@ -83,72 +44,61 @@ export default function AdminIdeaDetailPage({
             </p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-4 bg-error-light text-error rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-text mb-2">Placeholder Title</h2>
-            <p className="text-text-muted">Category: Placeholder</p>
+            <h2 className="text-2xl font-bold text-text mb-2">{idea.title}</h2>
+            <p className="text-text-muted">Category: {idea.category}</p>
+            <p className="text-text-muted text-sm mt-2">
+              Submitted by: {idea.submitter?.name || 'Unknown'} on{' '}
+              {formatDateTime(idea.createdAt)}
+            </p>
+            {idea.status && (
+              <p className="text-text-muted text-sm mt-1">
+                Current Status:{' '}
+                <span className="font-semibold">
+                  {idea.status === 'SUBMITTED' && '📋 Submitted'}
+                  {idea.status === 'UNDER_REVIEW' && '🔍 Under Review'}
+                  {idea.status === 'ACCEPTED' && '✅ Accepted'}
+                  {idea.status === 'REJECTED' && '❌ Rejected'}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="border-t border-border pt-6 mb-6">
             <h3 className="text-lg font-bold text-text mb-4">Description</h3>
-            <p className="text-text-muted whitespace-pre-wrap">Placeholder description</p>
+            <p className="text-text-muted whitespace-pre-wrap">{idea.description}</p>
           </div>
+
+          {idea.attachment && (
+            <div className="border-t border-border pt-6 mb-6">
+              <h3 className="text-lg font-bold text-text mb-4">Attachment</h3>
+              <div className="p-4 bg-surface-dark rounded-lg border border-border">
+                <p className="text-text text-sm">
+                  📎 <span className="font-medium">{idea.attachment.originalName}</span>
+                </p>
+                <p className="text-text-muted text-xs mt-1">
+                  {(idea.attachment.sizeBytes / 1024).toFixed(2)} KB
+                </p>
+              </div>
+            </div>
+          )}
+
+          {idea.currentComment && (
+            <div className="border-t border-border pt-6 mb-6">
+              <h3 className="text-lg font-bold text-text mb-4">Previous Comment</h3>
+              <p className="text-text-muted whitespace-pre-wrap p-4 bg-surface-dark rounded-lg border border-border">
+                {idea.currentComment}
+              </p>
+            </div>
+          )}
 
           <div className="border-t border-border pt-6 mb-6">
             <h3 className="text-lg font-bold text-text mb-4">Evaluation</h3>
-            <form className="space-y-4">
-              <div>
-                <label htmlFor="comment" className="block text-sm font-medium text-text mb-1">
-                  Your Comment <span className="text-error">*</span>
-                </label>
-                <textarea
-                  id="comment"
-                  name="comment"
-                  required
-                  disabled={loading}
-                  placeholder="Provide your evaluation feedback"
-                  minLength={5}
-                  maxLength={2000}
-                  rows={6}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark resize-none"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleEvaluate('UNDER_REVIEW')}
-                  className="flex-1 bg-warning-light text-white font-medium py-2 rounded-lg hover:bg-warning disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? 'Processing...' : 'Move to Under Review'}
-                </button>
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleEvaluate('ACCEPTED')}
-                  className="flex-1 bg-success text-white font-medium py-2 rounded-lg hover:bg-success-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? 'Processing...' : 'Accept'}
-                </button>
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handleEvaluate('REJECTED')}
-                  className="flex-1 bg-error text-white font-medium py-2 rounded-lg hover:bg-error-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? 'Processing...' : 'Reject'}
-                </button>
-              </div>
-            </form>
+            <EvaluationForm ideaId={params.ideaId} currentStatus={idea.status || 'SUBMITTED'} />
           </div>
         </div>
       </main>
     </div>
   )
 }
+

@@ -56,9 +56,10 @@ export const authConfig = {
       return token
     },
     session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id
-        (session.user as any).role = token.role
+      if (session.user && token) {
+        // Access token properties as plain values, not functions
+        session.user.id = String(token.id ?? '')
+        ;(session.user as any).role = String(token.role ?? '')
       }
       return session
     },

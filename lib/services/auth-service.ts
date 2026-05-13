@@ -2,7 +2,7 @@
  * Authentication service for business logic.
  */
 
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { userRepository } from '@/lib/db/repositories/user-repository'
 import { Result, failure, success } from '@/lib/types/result'
 import { ERROR_CODES } from '@/lib/utils/api-error'
