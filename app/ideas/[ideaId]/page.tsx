@@ -5,6 +5,7 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
+import { parseIdeaDescription, getMetadataLabel } from '@/lib/utils/idea-metadata'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -21,6 +22,9 @@ export default async function IdeaDetailPage({
   if (!idea || idea.submitterId !== user.id) {
     notFound()
   }
+
+  // Parse description to extract metadata
+  const { description, metadata } = parseIdeaDescription(idea.description)
 
   return (
     <div className="min-h-screen bg-surface">
@@ -49,8 +53,22 @@ export default async function IdeaDetailPage({
 
           <div className="border-t border-border pt-6 mb-6">
             <h2 className="text-lg font-bold text-text mb-4">Description</h2>
-            <p className="text-text-muted whitespace-pre-wrap">{idea.description}</p>
+            <p className="text-text-muted whitespace-pre-wrap">{description}</p>
           </div>
+
+          {metadata && Object.keys(metadata).length > 0 && (
+            <div className="border-t border-border pt-6 mb-6">
+              <h2 className="text-lg font-bold text-text mb-4">Category Details</h2>
+              <div className="space-y-3">
+                {Object.entries(metadata).map(([key, value]) => (
+                  <div key={key} className="bg-surface-dark rounded-lg p-3 border border-border">
+                    <p className="text-sm text-text-muted">{getMetadataLabel(key)}</p>
+                    <p className="text-text font-medium">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {idea.attachment && (
             <div className="border-t border-border pt-6 mb-6">
