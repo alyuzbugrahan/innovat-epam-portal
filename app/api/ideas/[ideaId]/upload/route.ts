@@ -32,58 +32,78 @@ export async function POST(
       )
     }
 
-    // Get file from request
+    // Get files from request (supports multiple files)
     const formData = await request.formData()
-    const file = formData.get('file') as File
+    const files = [
+      ...formData.getAll('files'),
+      ...formData.getAll('file'),
+    ]
+      .filter((item): item is File => item instanceof File && item.size > 0)
 
-    if (!file) {
+    if (files.length === 0) {
       return NextResponse.json(
         {
           ok: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'No file provided',
+            message: 'No files provided',
           },
         },
         { status: 400 }
       )
     }
 
-    // Convert to buffer
-    const buffer = Buffer.from(await file.arrayBuffer())
+    const uploadedFiles: Array<{ originalName: string; storagePath: string }> = []
 
-    // Validate and save file
-    const uploadResult = await uploadService.validateAndSaveFile(
-      buffer,
-      file.name,
-      file.type
-    )
+    for (const file of files) {
+      // Convert to buffer
+      const buffer = Buffer.from(await file.arrayBuffer())
 
-    if (!uploadResult.ok) {
-      return NextResponse.json(
-        { ok: false, error: uploadResult.error },
-        { status: 400 }
+      // Validate and save each file
+      const uploadResult = await uploadService.validateAndSaveFile(
+        buffer,
+        file.name,
+        file.type
       )
-    }
 
-    // Attach to idea
-    const attachResult = await ideaService.attachFile(
-      params.ideaId,
-      uploadResult.data.originalFileName,
-      uploadResult.data.storagePath,
-      uploadResult.data.mimeType,
-      uploadResult.data.sizeBytes
-    )
+      if (!uploadResult.ok) {
+        return NextResponse.json(
+          { ok: false, error: uploadResult.error },
+          { status: 400 }
+        )
+      }
 
-    if (!attachResult.ok) {
-      return NextResponse.json(
-        { ok: false, error: attachResult.error },
-        { status: 400 }
+      // Attach to idea
+      const attachResult = await ideaService.attachFile(
+        params.ideaId,
+        uploadResult.data.originalFileName,
+        uploadResult.data.storagePath,
+        uploadResult.data.mimeType,
+        uploadResult.data.sizeBytes
       )
+
+      if (!attachResult.ok) {
+        return NextResponse.json(
+          { ok: false, error: attachResult.error },
+          { status: 400 }
+        )
+      }
+
+      uploadedFiles.push({
+        originalName: uploadResult.data.originalFileName,
+        storagePath: uploadResult.data.storagePath,
+      })
     }
 
     return NextResponse.json(
-      { ok: true, data: { message: 'File uploaded successfully' } },
+      {
+        ok: true,
+        data: {
+          message: 'Files uploaded successfully',
+          count: uploadedFiles.length,
+          files: uploadedFiles,
+        },
+      },
       { status: 200 }
     )
   } catch (error) {

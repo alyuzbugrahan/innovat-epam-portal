@@ -18,7 +18,7 @@ export interface Idea {
 }
 
 export interface IdeaWithAttachment extends Idea {
-  attachment: IdeaAttachment | null
+  attachments: IdeaAttachment[]
 }
 
 export interface IdeaAttachment {
@@ -54,5 +54,5 @@ export interface IdeaDetail extends IdeaSummary {
     name: string
     email: string
   }
-  attachment: IdeaAttachment | null
+  attachments: IdeaAttachment[]
 }

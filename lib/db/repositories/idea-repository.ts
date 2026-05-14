@@ -6,11 +6,13 @@ import { prisma } from '@/lib/db/prisma'
 import { Idea } from '@prisma/client'
 
 export class IdeaRepository {
-  async findById(id: string): Promise<(Idea & { attachment: any | null; submitter: any | null }) | null> {
+  async findById(id: string): Promise<(Idea & { attachments: any[]; submitter: any | null }) | null> {
     return prisma.idea.findUnique({
       where: { id },
       include: {
-        attachment: true,
+        attachments: {
+          orderBy: { createdAt: 'asc' },
+        },
         submitter: {
           select: {
             id: true,

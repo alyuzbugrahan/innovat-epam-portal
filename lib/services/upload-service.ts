@@ -5,7 +5,12 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { env } from '@/lib/utils/env'
-import { isAllowedMimeType, isFileSizeValid, generateStorageFileName } from '@/lib/utils/file'
+import {
+  isAllowedMimeType,
+  isFileSizeValid,
+  generateStorageFileName,
+  getFileExtension,
+} from '@/lib/utils/file'
 import { Result, failure, success } from '@/lib/types/result'
 import { ERROR_CODES } from '@/lib/utils/api-error'
 
@@ -21,10 +26,11 @@ export class UploadService {
     sizeBytes: number
   }>> {
     // Validate MIME type
-    if (!isAllowedMimeType(mimeType)) {
+    if (!isAllowedMimeType(mimeType, originalFileName)) {
+      const extension = getFileExtension(originalFileName)
       return failure(
         ERROR_CODES.INVALID_FILE_TYPE,
-        `File type '${mimeType}' is not allowed`
+        `File type '${mimeType || 'unknown'}' with extension '${extension ? '.' + extension : 'none'}' is not allowed`
       )
     }
 

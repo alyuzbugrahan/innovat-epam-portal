@@ -30,7 +30,7 @@ model Idea {
   status           String       @default("SUBMITTED") // SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
   submitterId      String
   submitter        User         @relation(fields: [submitterId], references: [id], onDelete: Cascade)
-  attachment       IdeaAttachment?
+  attachments      IdeaAttachment[]
   evaluations      Evaluation[]
   currentComment   String?
   reviewedAt       DateTime?
@@ -40,7 +40,7 @@ model Idea {
 
 model IdeaAttachment {
   id           String   @id @default(cuid())
-  ideaId       String   @unique
+  ideaId       String
   idea         Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
   originalName String
   storagePath  String

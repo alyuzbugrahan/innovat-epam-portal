@@ -26,6 +26,7 @@ export default async function AdminIdeaDetailPage({
 
   // Parse description to extract metadata
   const { description, metadata } = parseIdeaDescription(idea.description)
+  const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
 
   return (
     <div className="min-h-screen bg-surface">
@@ -87,17 +88,35 @@ export default async function AdminIdeaDetailPage({
             </div>
           )}
 
-          {idea.attachment && (
+          {attachments.length > 0 && (
             <div className="border-t border-border pt-6 mb-6">
-              <h3 className="text-lg font-bold text-text mb-4">Attachment</h3>
-              <div className="p-4 bg-surface-dark rounded-lg border border-border">
-                <p className="text-text text-sm">
-                  📎 <span className="font-medium">{idea.attachment.originalName}</span>
-                </p>
-                <p className="text-text-muted text-xs mt-1">
-                  {(idea.attachment.sizeBytes / 1024).toFixed(2)} KB
-                </p>
-              </div>
+              <h3 className="text-lg font-bold text-text mb-4">Attachments</h3>
+              <ul className="space-y-2">
+                {attachments.map((attachment) => {
+                  const fileName = attachment.storagePath.split('/').pop() || attachment.storagePath
+                  return (
+                    <li
+                      key={attachment.id}
+                      className="flex items-center justify-between p-3 bg-surface-dark rounded-lg border border-border"
+                    >
+                      <div>
+                        <p className="text-text text-sm font-medium">📎 {attachment.originalName}</p>
+                        <p className="text-text-muted text-xs mt-1">
+                          {(attachment.sizeBytes / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                      <a
+                        href={`/uploads/${fileName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-primary text-white px-4 py-1 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+                      >
+                        View
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
           )}
 

@@ -28,15 +28,11 @@ const CATEGORY_FIELDS: Record<string, { label: string; name: string; placeholder
   },
 }
 
-interface IdeaFormProps {
-  onError?: (error: string) => void
-}
-
-export default function IdeaForm({ onError }: IdeaFormProps) {
+export default function IdeaForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [category, setCategory] = useState('Other')
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -82,16 +78,17 @@ export default function IdeaForm({ onError }: IdeaFormProps) {
       if (!createResponse.ok) {
         const errorMsg = createData.error?.message || 'Failed to create idea'
         setError(errorMsg)
-        onError?.(errorMsg)
         return
       }
 
       const ideaId = createData.data.ideaId
 
-      // Upload file if provided
-      if (file) {
+      // Upload files if provided
+      if (files.length > 0) {
         const fileFormData = new FormData()
-        fileFormData.append('file', file)
+        for (const file of files) {
+          fileFormData.append('files', file)
+        }
 
         const uploadResponse = await fetch(`/api/ideas/${ideaId}/upload`, {
           method: 'POST',
@@ -99,18 +96,18 @@ export default function IdeaForm({ onError }: IdeaFormProps) {
         })
 
         if (!uploadResponse.ok) {
-          setError('Idea created but file upload failed')
+          const uploadData = await uploadResponse.json().catch(() => null)
+          setError(uploadData?.error?.message || 'Idea created but file upload failed')
           // Still redirect since idea was created
-          setTimeout(() => router.push('/ideas'), 1500)
+          setTimeout(() => router.push(`/ideas/${ideaId}`), 1500)
           return
         }
       }
 
-      router.push('/ideas')
+      router.push(`/ideas/${ideaId}`)
     } catch (err) {
       const errorMsg = 'An error occurred. Please try again.'
       setError(errorMsg)
-      onError?.(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -207,20 +204,30 @@ export default function IdeaForm({ onError }: IdeaFormProps) {
         )}
 
         <div>
-          <label htmlFor="file" className="block text-sm font-medium text-text mb-1">
-            Attachment (Optional)
+          <label htmlFor="files" className="block text-sm font-medium text-text mb-1">
+            Attachments (Optional)
           </label>
           <input
-            id="file"
+            id="files"
             type="file"
-            name="file"
+            name="files"
+            multiple
             disabled={loading}
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={(e) => setFiles(Array.from(e.target.files || []))}
             className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark"
           />
           <p className="text-xs text-text-muted mt-1">
-            Max 10 MB. Supported: PDF, images, documents
+            Max 10 MB per file. Supported: PDF, images, documents
           </p>
+          {files.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-text-muted">
+              {files.map((file) => (
+                <li key={`${file.name}-${file.lastModified}`}>
+                  {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="flex gap-4">

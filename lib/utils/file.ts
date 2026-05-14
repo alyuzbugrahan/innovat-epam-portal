@@ -16,10 +16,56 @@ const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'video/mp4',
+  'video/quicktime',
+  'video/x-msvideo',
+  'video/webm',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/mp4',
+  'audio/aac',
+  'audio/ogg',
 ])
 
-export function isAllowedMimeType(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.has(mimeType.toLowerCase())
+// Extension fallback is needed because some browsers/devices provide empty or generic MIME types.
+const ALLOWED_FILE_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'pdf',
+  'txt',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'mp4',
+  'mov',
+  'avi',
+  'webm',
+  'mkv',
+  'mp3',
+  'wav',
+  'm4a',
+  'aac',
+  'ogg',
+])
+
+export function isAllowedMimeType(mimeType: string, fileName?: string): boolean {
+  const normalizedMimeType = (mimeType || '').toLowerCase().trim()
+
+  if (normalizedMimeType && ALLOWED_MIME_TYPES.has(normalizedMimeType)) {
+    return true
+  }
+
+  if (fileName) {
+    const extension = getFileExtension(fileName)
+    return ALLOWED_FILE_EXTENSIONS.has(extension)
+  }
+
+  return false
 }
 
 export function isFileSizeValid(sizeBytes: number): boolean {

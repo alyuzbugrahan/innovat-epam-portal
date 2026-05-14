@@ -47,7 +47,7 @@ export class IdeaService {
   /**
    * Get idea detail by ID with ownership validation.
    */
-  async getIdeaDetail(ideaId: string, userId: string, userRole: string): Promise<Result<Idea & { attachment: any | null }>> {
+  async getIdeaDetail(ideaId: string, userId: string, userRole: string): Promise<Result<Idea & { attachments: any[] }>> {
     try {
       const idea = await ideaRepository.findById(ideaId)
       if (!idea) {
@@ -109,12 +109,7 @@ export class IdeaService {
         )
       }
 
-      // Delete existing attachment if present
-      if (idea.attachment) {
-        await attachmentRepository.delete(ideaId)
-      }
-
-      // Create new attachment
+      // Create new attachment record for this idea.
       await attachmentRepository.create(ideaId, originalName, storagePath, mimeType, sizeBytes)
       return success(undefined)
     } catch (error) {

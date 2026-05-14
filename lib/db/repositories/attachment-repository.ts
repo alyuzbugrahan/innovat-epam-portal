@@ -6,9 +6,10 @@ import { prisma } from '@/lib/db/prisma'
 import { IdeaAttachment } from '@prisma/client'
 
 export class AttachmentRepository {
-  async findByIdeaId(ideaId: string): Promise<IdeaAttachment | null> {
-    return prisma.ideaAttachment.findUnique({
+  async findByIdeaId(ideaId: string): Promise<IdeaAttachment[]> {
+    return prisma.ideaAttachment.findMany({
       where: { ideaId },
+      orderBy: { createdAt: 'asc' },
     })
   }
 
@@ -30,8 +31,8 @@ export class AttachmentRepository {
     })
   }
 
-  async delete(ideaId: string): Promise<void> {
-    await prisma.ideaAttachment.delete({
+  async deleteByIdeaId(ideaId: string): Promise<void> {
+    await prisma.ideaAttachment.deleteMany({
       where: { ideaId },
     })
   }
