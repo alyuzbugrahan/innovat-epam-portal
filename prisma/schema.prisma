@@ -27,7 +27,7 @@ model Idea {
   title            String
   description      String
   category         String
-  status           String       @default("SUBMITTED") // SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
+  status           String       @default("SUBMITTED") // DRAFT | SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
   submitterId      String
   submitter        User         @relation(fields: [submitterId], references: [id], onDelete: Cascade)
   attachments      IdeaAttachment[]

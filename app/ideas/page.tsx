@@ -12,7 +12,7 @@ export default async function IdeasListPage() {
   const user = session?.user as any
 
   // Fetch submitter's ideas
-  const ideas = await ideaRepository.findBySubmitterId(user.id)
+  const ideas = (await ideaRepository.findBySubmitterId(user.id)).filter((idea) => idea.status !== 'DRAFT')
 
   return (
     <div className="min-h-screen bg-surface">
@@ -23,6 +23,9 @@ export default async function IdeasListPage() {
             <div className="flex gap-4">
               <Link href="/ideas/new" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">
                 New Idea
+              </Link>
+              <Link href="/ideas/drafts" className="bg-warning-light text-white px-4 py-2 rounded-lg hover:bg-warning">
+                Drafts
               </Link>
               <Link href="/" className="text-primary hover:text-primary-dark">
                 Home
@@ -81,6 +84,8 @@ function getStatusColor(status: string): string {
   switch (status) {
     case 'SUBMITTED':
       return 'bg-secondary-light text-white'
+    case 'DRAFT':
+      return 'bg-warning-light text-white'
     case 'UNDER_REVIEW':
       return 'bg-warning-light text-white'
     case 'ACCEPTED':

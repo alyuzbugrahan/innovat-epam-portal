@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useRouter } from 'next/navigation'
 
 const CATEGORIES = [
@@ -28,12 +29,38 @@ const CATEGORY_FIELDS: Record<string, { label: string; name: string; placeholder
   },
 }
 
-export default function IdeaForm() {
+interface IdeaFormInitialValues {
+  title: string
+  description: string
+  category: string
+  metadata?: Record<string, string | undefined>
+}
+
+interface IdeaFormProps {
+  mode?: 'create' | 'edit'
+  ideaId?: string
+  initialValues?: IdeaFormInitialValues
+}
+
+export default function IdeaForm({
+  mode = 'create',
+  ideaId,
+  initialValues,
+}: IdeaFormProps) {
+  const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [category, setCategory] = useState('Other')
+  const [category, setCategory] = useState(initialValues?.category || 'Other')
   const [files, setFiles] = useState<File[]>([])
+  const [submitAction, setSubmitAction] = useState<'draft' | 'submit'>('submit')
   const router = useRouter()
+
+  function handleActionClick(action: 'draft' | 'submit') {
+    flushSync(() => {
+      setSubmitAction(action)
+    })
+    formRef.current?.requestSubmit()
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,7 +68,9 @@ export default function IdeaForm() {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    let title = formData.get('title') as string
+    const targetStatus = submitAction === 'draft' ? 'DRAFT' : 'SUBMITTED'
+
+    const title = formData.get('title') as string
     let description = formData.get('description') as string
     const selectedCategory = formData.get('category') as string
 
@@ -62,26 +91,59 @@ export default function IdeaForm() {
     }
 
     try {
-      // Create idea
-      const createResponse = await fetch('/api/ideas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description,
-          category: selectedCategory,
-        }),
-      })
+      let currentIdeaId = ideaId
 
-      const createData = await createResponse.json()
+      if (mode === 'edit') {
+        if (!currentIdeaId) {
+          setError('Missing draft identifier')
+          return
+        }
 
-      if (!createResponse.ok) {
-        const errorMsg = createData.error?.message || 'Failed to create idea'
-        setError(errorMsg)
-        return
+        const updateResponse = await fetch(`/api/ideas/${currentIdeaId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            description,
+            category: selectedCategory,
+            status: targetStatus,
+          }),
+        })
+
+        const updateData = await updateResponse.json()
+
+        if (!updateResponse.ok) {
+          const errorMsg = updateData.error?.message || 'Failed to update draft'
+          setError(errorMsg)
+          return
+        }
+      } else {
+        const createResponse = await fetch('/api/ideas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            description,
+            category: selectedCategory,
+            status: targetStatus,
+          }),
+        })
+
+        const createData = await createResponse.json()
+
+        if (!createResponse.ok) {
+          const errorMsg = createData.error?.message || 'Failed to create idea'
+          setError(errorMsg)
+          return
+        }
+
+        currentIdeaId = createData.data.ideaId
       }
 
-      const ideaId = createData.data.ideaId
+      if (!currentIdeaId) {
+        setError('Failed to determine idea identifier')
+        return
+      }
 
       // Upload files if provided
       if (files.length > 0) {
@@ -90,21 +152,32 @@ export default function IdeaForm() {
           fileFormData.append('files', file)
         }
 
-        const uploadResponse = await fetch(`/api/ideas/${ideaId}/upload`, {
+        const uploadResponse = await fetch(`/api/ideas/${currentIdeaId}/upload`, {
           method: 'POST',
           body: fileFormData,
         })
 
         if (!uploadResponse.ok) {
           const uploadData = await uploadResponse.json().catch(() => null)
-          setError(uploadData?.error?.message || 'Idea created but file upload failed')
-          // Still redirect since idea was created
-          setTimeout(() => router.push(`/ideas/${ideaId}`), 1500)
+          setError(uploadData?.error?.message || 'Idea saved but file upload failed')
+          // Still redirect since idea save succeeded
+          setTimeout(() => {
+            if (targetStatus === 'DRAFT') {
+              router.push('/ideas/drafts')
+              return
+            }
+            router.push(`/ideas/${currentIdeaId}`)
+          }, 1500)
           return
         }
       }
 
-      router.push(`/ideas/${ideaId}`)
+      if (targetStatus === 'DRAFT') {
+        router.push('/ideas/drafts')
+        return
+      }
+
+      router.push(`/ideas/${currentIdeaId}`)
     } catch (err) {
       const errorMsg = 'An error occurred. Please try again.'
       setError(errorMsg)
@@ -123,7 +196,7 @@ export default function IdeaForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-text mb-1">
             Title <span className="text-error">*</span>
@@ -134,6 +207,7 @@ export default function IdeaForm() {
             name="title"
             required
             disabled={loading}
+            defaultValue={initialValues?.title || ''}
             placeholder="Brief title of your idea"
             minLength={3}
             maxLength={200}
@@ -150,6 +224,7 @@ export default function IdeaForm() {
             name="description"
             required
             disabled={loading}
+            defaultValue={initialValues?.description || ''}
             placeholder="Detailed description of your idea (minimum 10 characters)"
             minLength={10}
             maxLength={5000}
@@ -193,6 +268,7 @@ export default function IdeaForm() {
               name={extraField.name}
               required
               disabled={loading}
+              defaultValue={initialValues?.metadata?.[extraField.name] || ''}
               placeholder={extraField.placeholder}
               maxLength={200}
               className="w-full px-3 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark"
@@ -232,11 +308,20 @@ export default function IdeaForm() {
 
         <div className="flex gap-4">
           <button
-            type="submit"
+            type="button"
             disabled={loading}
+            onClick={() => handleActionClick('draft')}
+            className="flex-1 bg-warning-light text-white font-medium py-2 rounded-lg hover:bg-warning disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Saving...' : mode === 'edit' ? 'Save Draft' : 'Save as Draft'}
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => handleActionClick('submit')}
             className="flex-1 bg-primary text-white font-medium py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Submitting...' : 'Submit Idea'}
+            {loading ? 'Submitting...' : mode === 'edit' ? 'Submit' : 'Submit Idea'}
           </button>
           <button
             type="button"

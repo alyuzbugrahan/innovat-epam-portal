@@ -16,10 +16,11 @@ export class IdeaService {
     title: string,
     description: string,
     category: string,
-    submitterId: string
+    submitterId: string,
+    status: 'DRAFT' | 'SUBMITTED' = 'SUBMITTED'
   ): Promise<Result<{ ideaId: string }>> {
     try {
-      const idea = await ideaRepository.create(title, description, category, submitterId)
+      const idea = await ideaRepository.create(title, description, category, submitterId, status)
       return success({ ideaId: idea.id })
     } catch (error) {
       return failure(
@@ -40,6 +41,21 @@ export class IdeaService {
       return failure(
         ERROR_CODES.INTERNAL_ERROR,
         'Failed to fetch ideas'
+      )
+    }
+  }
+
+  /**
+   * Get draft ideas submitted by a user.
+   */
+  async getSubmitterDrafts(submitterId: string): Promise<Result<Idea[]>> {
+    try {
+      const drafts = await ideaRepository.findDraftsBySubmitterId(submitterId)
+      return success(drafts)
+    } catch (error) {
+      return failure(
+        ERROR_CODES.INTERNAL_ERROR,
+        'Failed to fetch drafts'
       )
     }
   }
@@ -117,6 +133,44 @@ export class IdeaService {
         ERROR_CODES.INTERNAL_ERROR,
         'Failed to attach file'
       )
+    }
+  }
+
+  /**
+   * Update a draft idea owned by the submitter.
+   */
+  async updateDraftIdea(
+    ideaId: string,
+    userId: string,
+    title: string,
+    description: string,
+    category: string,
+    status: 'DRAFT' | 'SUBMITTED'
+  ): Promise<Result<Idea>> {
+    try {
+      const idea = await ideaRepository.findById(ideaId)
+      if (!idea) {
+        return failure(ERROR_CODES.NOT_FOUND, 'Idea not found')
+      }
+
+      if (idea.submitterId !== userId) {
+        return failure(ERROR_CODES.FORBIDDEN, 'You do not have permission to edit this draft')
+      }
+
+      if (idea.status !== 'DRAFT') {
+        return failure(ERROR_CODES.CONFLICT, 'Only draft ideas can be edited')
+      }
+
+      const updatedIdea = await ideaRepository.updateIdea(ideaId, {
+        title,
+        description,
+        category,
+        status,
+      })
+
+      return success(updatedIdea)
+    } catch (error) {
+      return failure(ERROR_CODES.INTERNAL_ERROR, 'Failed to update draft')
     }
   }
 }

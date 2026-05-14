@@ -40,6 +40,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/admin/ideas/[ideaId]/page.js"
+    ],
+    "/ideas/drafts/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/drafts/page.js"
+    ],
+    "/ideas/[ideaId]/edit/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/edit/page.js"
     ]
   }
 }

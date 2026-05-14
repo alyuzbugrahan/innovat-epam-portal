@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, description, category } = validationResult.data
+    const { title, description, category, status } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
     // Create idea
-    const result = await ideaService.createIdea(title, description, category, user.id)
+    const result = await ideaService.createIdea(title, description, category, user.id, status)
 
     if (!result.ok) {
       return NextResponse.json(

@@ -31,8 +31,21 @@ export class IdeaRepository {
     })
   }
 
+  async findDraftsBySubmitterId(submitterId: string): Promise<Idea[]> {
+    return prisma.idea.findMany({
+      where: {
+        submitterId,
+        status: 'DRAFT',
+      },
+      orderBy: { updatedAt: 'desc' },
+    })
+  }
+
   async findAll(): Promise<Idea[]> {
     return prisma.idea.findMany({
+      where: {
+        status: { not: 'DRAFT' },
+      },
       orderBy: { createdAt: 'desc' },
     })
   }
@@ -41,7 +54,8 @@ export class IdeaRepository {
     title: string,
     description: string,
     category: string,
-    submitterId: string
+    submitterId: string,
+    status: string = 'SUBMITTED'
   ): Promise<Idea> {
     return prisma.idea.create({
       data: {
@@ -49,8 +63,23 @@ export class IdeaRepository {
         description,
         category,
         submitterId,
-        status: 'SUBMITTED',
+        status,
       },
+    })
+  }
+
+  async updateIdea(
+    ideaId: string,
+    data: {
+      title: string
+      description: string
+      category: string
+      status: string
+    }
+  ): Promise<Idea> {
+    return prisma.idea.update({
+      where: { id: ideaId },
+      data,
     })
   }
 
