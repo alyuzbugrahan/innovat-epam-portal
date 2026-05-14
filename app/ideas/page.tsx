@@ -86,8 +86,12 @@ function getStatusColor(status: string): string {
       return 'bg-secondary-light text-white'
     case 'DRAFT':
       return 'bg-warning-light text-white'
-    case 'UNDER_REVIEW':
+    case 'INITIAL_SCREENING':
       return 'bg-warning-light text-white'
+    case 'TECHNICAL_REVIEW':
+      return 'bg-primary text-white'
+    case 'BUSINESS_REVIEW':
+      return 'bg-secondary text-white'
     case 'ACCEPTED':
       return 'bg-success text-white'
     case 'REJECTED':

@@ -70,8 +70,12 @@ function getStatusColor(status: string): string {
   switch (status) {
     case 'SUBMITTED':
       return 'bg-secondary'
-    case 'UNDER_REVIEW':
+    case 'INITIAL_SCREENING':
       return 'bg-warning-light'
+    case 'TECHNICAL_REVIEW':
+      return 'bg-primary'
+    case 'BUSINESS_REVIEW':
+      return 'bg-secondary-light'
     case 'ACCEPTED':
       return 'bg-success'
     case 'REJECTED':

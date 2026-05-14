@@ -2,7 +2,13 @@
  * Evaluation-related domain types.
  */
 
-export type IdeaStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED'
+export type IdeaStatus =
+  | 'SUBMITTED'
+  | 'INITIAL_SCREENING'
+  | 'TECHNICAL_REVIEW'
+  | 'BUSINESS_REVIEW'
+  | 'ACCEPTED'
+  | 'REJECTED'
 
 export interface Evaluation {
   id: string
@@ -15,6 +21,6 @@ export interface Evaluation {
 }
 
 export interface EvaluationRequest {
-  toStatus: 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED'
+  toStatus: 'INITIAL_SCREENING' | 'TECHNICAL_REVIEW' | 'BUSINESS_REVIEW' | 'ACCEPTED' | 'REJECTED'
   comment: string
 }

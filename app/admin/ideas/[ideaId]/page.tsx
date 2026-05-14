@@ -5,9 +5,9 @@
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
 import { parseIdeaDescription, getMetadataLabel } from '@/lib/utils/idea-metadata'
+import EvaluationForm from '@/components/admin/evaluation-form'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import EvaluationForm from './_components/evaluation-form'
 
 async function getIdea(ideaId: string) {
   return await ideaRepository.findById(ideaId)
@@ -61,7 +61,9 @@ export default async function AdminIdeaDetailPage({
                 Current Status:{' '}
                 <span className="font-semibold">
                   {idea.status === 'SUBMITTED' && '📋 Submitted'}
-                  {idea.status === 'UNDER_REVIEW' && '🔍 Under Review'}
+                  {idea.status === 'INITIAL_SCREENING' && '🧭 Initial Screening'}
+                  {idea.status === 'TECHNICAL_REVIEW' && '🛠 Technical Review'}
+                  {idea.status === 'BUSINESS_REVIEW' && '💼 Business Review'}
                   {idea.status === 'ACCEPTED' && '✅ Accepted'}
                   {idea.status === 'REJECTED' && '❌ Rejected'}
                 </span>

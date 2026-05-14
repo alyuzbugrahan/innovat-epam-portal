@@ -2,7 +2,14 @@
  * Idea-related domain types.
  */
 
-export type IdeaStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED'
+export type IdeaStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'INITIAL_SCREENING'
+  | 'TECHNICAL_REVIEW'
+  | 'BUSINESS_REVIEW'
+  | 'ACCEPTED'
+  | 'REJECTED'
 
 export interface Idea {
   id: string

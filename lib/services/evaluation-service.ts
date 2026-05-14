@@ -8,8 +8,10 @@ import { Result, failure, success } from '@/lib/types/result'
 import { ERROR_CODES } from '@/lib/utils/api-error'
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  SUBMITTED: ['UNDER_REVIEW'],
-  UNDER_REVIEW: ['ACCEPTED', 'REJECTED'],
+  SUBMITTED: ['INITIAL_SCREENING'],
+  INITIAL_SCREENING: ['TECHNICAL_REVIEW'],
+  TECHNICAL_REVIEW: ['BUSINESS_REVIEW'],
+  BUSINESS_REVIEW: ['ACCEPTED', 'REJECTED'],
   ACCEPTED: [],
   REJECTED: [],
 }

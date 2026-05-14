@@ -27,7 +27,7 @@ model Idea {
   title            String
   description      String
   category         String
-  status           String       @default("SUBMITTED") // DRAFT | SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
+  status           String       @default("SUBMITTED") // DRAFT | SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
   submitterId      String
   submitter        User         @relation(fields: [submitterId], references: [id], onDelete: Cascade)
   attachments      IdeaAttachment[]
@@ -55,8 +55,8 @@ model Evaluation {
   idea        Idea       @relation(fields: [ideaId], references: [id], onDelete: Cascade)
   evaluatorId String
   evaluator   User       @relation(fields: [evaluatorId], references: [id])
-  fromStatus  String     // SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
-  toStatus    String     // SUBMITTED | UNDER_REVIEW | ACCEPTED | REJECTED
+  fromStatus  String     // SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
+  toStatus    String     // SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
   comment     String
   createdAt   DateTime   @default(now())
 }
