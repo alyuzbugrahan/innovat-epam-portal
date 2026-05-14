@@ -18,7 +18,8 @@ export class EvaluationRepository {
     evaluatorId: string,
     fromStatus: string,
     toStatus: string,
-    comment: string
+    comment: string,
+    score?: number
   ): Promise<Evaluation> {
     return prisma.evaluation.create({
       data: {
@@ -27,6 +28,7 @@ export class EvaluationRepository {
         fromStatus,
         toStatus,
         comment,
+        score,
       },
     })
   }

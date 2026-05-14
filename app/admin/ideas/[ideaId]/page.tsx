@@ -27,6 +27,7 @@ export default async function AdminIdeaDetailPage({
   // Parse description to extract metadata
   const { description, metadata } = parseIdeaDescription(idea.description)
   const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
+  const latestEvaluation = Array.isArray(idea.evaluations) && idea.evaluations.length > 0 ? idea.evaluations[0] : null
   const isFinalDecision = idea.status === 'ACCEPTED' || idea.status === 'REJECTED'
   const revealSubmitterIdentity = !idea.blindReview || isFinalDecision
 
@@ -130,6 +131,15 @@ export default async function AdminIdeaDetailPage({
               <h3 className="text-lg font-bold text-text mb-4">Previous Comment</h3>
               <p className="text-text-muted whitespace-pre-wrap p-4 bg-surface-dark rounded-lg border border-border">
                 {idea.currentComment}
+              </p>
+            </div>
+          )}
+
+          {latestEvaluation?.score != null && (
+            <div className="border-t border-border pt-6 mb-6">
+              <h3 className="text-lg font-bold text-text mb-4">Latest Score</h3>
+              <p className="text-text-muted p-4 bg-surface-dark rounded-lg border border-border">
+                {latestEvaluation.score} / 5
               </p>
             </div>
           )}

@@ -25,7 +25,8 @@ export class EvaluationService {
     ideaId: string,
     evaluatorId: string,
     toStatus: string,
-    comment: string
+    comment: string,
+    score?: number
   ): Promise<Result<void>> {
     try {
       // Fetch current idea
@@ -62,7 +63,8 @@ export class EvaluationService {
         evaluatorId,
         fromStatus,
         toStatus,
-        comment
+        comment,
+        score
       )
 
       // Update idea status
@@ -71,9 +73,24 @@ export class EvaluationService {
 
       return success(undefined)
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+
+      if (
+        score != null &&
+        (message.includes('Unknown arg `score`') ||
+          message.includes('Unknown field `score`') ||
+          message.includes('no column named score'))
+      ) {
+        return failure(
+          ERROR_CODES.INTERNAL_ERROR,
+          'Score could not be saved. Restart the development server and ensure the add-scoring migration is applied.'
+        )
+      }
+
       return failure(
         ERROR_CODES.INTERNAL_ERROR,
-        'Failed to evaluate idea'
+        'Failed to evaluate idea',
+        { internal: [message] }
       )
     }
   }

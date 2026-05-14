@@ -26,6 +26,9 @@ export default async function IdeaDetailPage({
   // Parse description to extract metadata
   const { description, metadata } = parseIdeaDescription(idea.description)
   const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
+  const latestScoredEvaluation = Array.isArray(idea.evaluations)
+    ? idea.evaluations.find((evaluation) => evaluation.score != null)
+    : null
 
   return (
     <div className="min-h-screen bg-surface">
@@ -103,11 +106,14 @@ export default async function IdeaDetailPage({
             </div>
           )}
 
-          {idea.currentComment && (
+          {(idea.currentComment || latestScoredEvaluation?.score != null) && (
             <div className="border-t border-border pt-6 mb-6">
               <h2 className="text-lg font-bold text-text mb-4">Evaluator Comment</h2>
               <div className="bg-surface-dark rounded-lg p-4 border border-border">
-                <p className="text-text">{idea.currentComment}</p>
+                {idea.currentComment && <p className="text-text">{idea.currentComment}</p>}
+                {latestScoredEvaluation?.score != null && (
+                  <p className="text-text mt-2">Score: {latestScoredEvaluation.score}/5</p>
+                )}
                 {idea.reviewedAt && (
                   <p className="text-sm text-text-muted mt-2">
                     Reviewed: {formatDateTime(idea.reviewedAt)}

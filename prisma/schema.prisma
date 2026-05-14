@@ -59,5 +59,6 @@ model Evaluation {
   fromStatus  String     // SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
   toStatus    String     // SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
   comment     String
+  score       Int?       // Optional rating: 1-5
   createdAt   DateTime   @default(now())
 }

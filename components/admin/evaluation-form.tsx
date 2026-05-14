@@ -80,8 +80,20 @@ function getActionsForStatus(status: string): ActionConfig[] {
 export default function EvaluationForm({ ideaId, currentStatus }: EvaluationFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [score, setScore] = useState<number | ''>('')
   const router = useRouter()
   const actions = getActionsForStatus(currentStatus)
+
+  function getErrorMessage(payload: any, fallback: string): string {
+    const details = payload?.error?.details
+    const firstDetail = details
+      ? Object.values(details)
+          .flat()
+          .find((message) => typeof message === 'string' && message.trim().length > 0)
+      : null
+
+    return firstDetail || payload?.error?.message || fallback
+  }
 
   async function handleEvaluate(toStatus: ReviewStatus, requireComment: boolean) {
     setError('')
@@ -99,13 +111,17 @@ export default function EvaluationForm({ ideaId, currentStatus }: EvaluationForm
       const response = await fetch(`/api/admin/ideas/${ideaId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ toStatus, comment }),
+        body: JSON.stringify({
+          toStatus,
+          comment,
+          score: score === '' ? undefined : score,
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error?.message || 'Failed to evaluate idea')
+        setError(getErrorMessage(data, 'Failed to evaluate idea'))
         return
       }
 
@@ -153,6 +169,30 @@ export default function EvaluationForm({ ideaId, currentStatus }: EvaluationForm
             rows={6}
             className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark resize-none"
           />
+        </div>
+
+        <div>
+          <label htmlFor="score" className="block text-sm font-medium text-text mb-1">
+            Score (optional)
+          </label>
+          <select
+            id="score"
+            name="score"
+            value={score === '' ? '' : String(score)}
+            disabled={loading}
+            onChange={(e) => {
+              const value = e.target.value
+              setScore(value === '' ? '' : Number(value))
+            }}
+            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark bg-background text-text"
+          >
+            <option value="">No score</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
         </div>
 
         <div className="flex gap-4 flex-wrap">

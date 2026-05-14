@@ -38,7 +38,7 @@ export async function PATCH(
       )
     }
 
-    const { toStatus, comment } = validationResult.data
+    const { toStatus, comment, score } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
@@ -47,11 +47,17 @@ export async function PATCH(
       params.ideaId,
       user.id,
       toStatus,
-      comment
+      comment,
+      score
     )
 
     if (!result.ok) {
-      const status = result.error.code === 'NOT_FOUND' ? 404 : 400
+      const status =
+        result.error.code === 'NOT_FOUND'
+          ? 404
+          : result.error.code === 'INTERNAL_ERROR'
+            ? 500
+            : 400
       return NextResponse.json(
         { ok: false, error: result.error },
         { status }
