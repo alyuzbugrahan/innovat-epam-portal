@@ -116,3 +116,32 @@ export async function PATCH(
     )
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { ideaId: string } }
+) {
+  const authResult = await checkAuth()
+  if (!authResult.ok) {
+    return NextResponse.json({ ok: false, error: authResult.error }, { status: 401 })
+  }
+
+  const user = authResult.data.user as any
+
+  const result = await ideaService.deleteIdea(params.ideaId, user.id)
+
+  if (!result.ok) {
+    const statusCode =
+      result.error.code === 'NOT_FOUND'
+        ? 404
+        : result.error.code === 'FORBIDDEN'
+          ? 403
+          : result.error.code === 'CONFLICT'
+            ? 400
+            : 500
+
+    return NextResponse.json({ ok: false, error: result.error }, { status: statusCode })
+  }
+
+  return NextResponse.json({ ok: true }, { status: 200 })
+}

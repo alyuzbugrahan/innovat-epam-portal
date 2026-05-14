@@ -5,17 +5,34 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDate } from '@/lib/utils/dates'
-import { parseIdeaDescription } from '@/lib/utils/idea-metadata'
 import Link from 'next/link'
 import NavBar from '@/components/layout/navbar'
 import StatusBadge from '@/components/ui/status-badge'
+import IdeaSearchFilters from '@/components/ideas/idea-search-filters'
+import { Suspense } from 'react'
 
-export default async function IdeasListPage() {
+export default async function IdeasListPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; status?: string; category?: string; sort?: string }
+}) {
   const session = await requireAuth()
   const user = session?.user as any
 
-  // Fetch submitter's ideas
-  const ideas = (await ideaRepository.findBySubmitterId(user.id)).filter((idea) => idea.status !== 'DRAFT')
+  const search = searchParams.q?.trim() || undefined
+  const status = searchParams.status?.trim() || undefined
+  const category = searchParams.category?.trim() || undefined
+  const sort = (searchParams.sort === 'oldest' ? 'oldest' : undefined) as 'oldest' | undefined
+
+  const hasFilters = !!(search || status || category || searchParams.sort)
+
+  const ideas = await ideaRepository.findBySubmitterWithFilters({
+    submitterId: user.id,
+    search,
+    status,
+    category,
+    sort,
+  })
 
   return (
     <div className="min-h-screen bg-surface">
@@ -23,10 +40,14 @@ export default async function IdeasListPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
           <div>
             <h1 className="text-xl font-semibold text-text">My Ideas</h1>
-            <p className="mt-0.5 text-sm text-text-muted">{ideas.length} submitted idea{ideas.length !== 1 ? 's' : ''}</p>
+            <p className="mt-0.5 text-sm text-text-muted">
+              {hasFilters
+                ? `${ideas.length} result${ideas.length !== 1 ? 's' : ''}`
+                : `${ideas.length} idea${ideas.length !== 1 ? 's' : ''}`}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -44,18 +65,29 @@ export default async function IdeasListPage() {
           </div>
         </div>
 
+        {/* Search and filters */}
+        <Suspense>
+          <IdeaSearchFilters />
+        </Suspense>
+
         {ideas.length === 0 ? (
           <div className="bg-background rounded-lg border border-border p-12 text-center">
-            <h2 className="text-base font-medium text-text mb-2">No ideas yet</h2>
+            <h2 className="text-base font-medium text-text mb-2">
+              {hasFilters ? 'No ideas found' : 'No ideas yet'}
+            </h2>
             <p className="text-sm text-text-muted mb-6">
-              Submit your first innovation idea to share it with the team.
+              {hasFilters
+                ? 'No ideas match the current filters. Try adjusting your search.'
+                : 'Submit your first innovation idea to share it with the team.'}
             </p>
-            <Link
-              href="/ideas/new"
-              className="inline-flex items-center text-sm font-medium bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              Submit an idea
-            </Link>
+            {!hasFilters && (
+              <Link
+                href="/ideas/new"
+                className="inline-flex items-center text-sm font-medium bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+              >
+                Submit an idea
+              </Link>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

@@ -5,9 +5,9 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDate } from '@/lib/utils/dates'
-import { parseIdeaDescription } from '@/lib/utils/idea-metadata'
 import Link from 'next/link'
 import NavBar from '@/components/layout/navbar'
+import DraftCard from '@/components/ideas/draft-card'
 
 export default async function DraftIdeasPage() {
   const session = await requireAuth()
@@ -49,36 +49,15 @@ export default async function DraftIdeasPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {drafts.map((draft) => {
-              const preview = parseIdeaDescription(draft.description).description
-              return (
-                <div
-                  key={draft.id}
-                  className="flex items-center justify-between gap-4 bg-background rounded-lg border border-border px-5 py-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-text truncate">{draft.title}</p>
-                    <p className="text-xs text-text-muted mt-0.5">
-                      {draft.category} &middot; Updated {formatDate(draft.updatedAt)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Link
-                      href={`/ideas/${draft.id}/edit`}
-                      className="text-sm px-3 py-1.5 rounded-md border border-border text-text-muted hover:text-text hover:bg-surface-dark transition-colors"
-                    >
-                      Edit
-                    </Link>
-                    <Link
-                      href={`/ideas/${draft.id}`}
-                      className="text-sm px-3 py-1.5 rounded-md text-primary hover:text-primary-dark transition-colors"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
-              )
-            })}
+            {drafts.map((draft) => (
+              <DraftCard
+                key={draft.id}
+                id={draft.id}
+                title={draft.title}
+                category={draft.category}
+                updatedAtFormatted={formatDate(draft.updatedAt)}
+              />
+            ))}
           </div>
         )}
       </main>

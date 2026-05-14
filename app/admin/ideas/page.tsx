@@ -11,12 +11,13 @@ import StatusBadge from '@/components/ui/status-badge'
 import AdminQueueRefresher from '@/components/admin/admin-queue-refresher'
 import AdminSearchBar from '@/components/admin/admin-search-bar'
 import AdminFilters from '@/components/admin/admin-filters'
+import AdminQueueTabs from '@/components/admin/admin-queue-tabs'
 import { Suspense } from 'react'
 
 export default async function AdminIdeasPage({
   searchParams,
 }: {
-  searchParams: { q?: string; status?: string; category?: string; sort?: string }
+  searchParams: { q?: string; status?: string; category?: string; sort?: string; tab?: string }
 }) {
   await requireRole('ADMIN')
 
@@ -24,8 +25,13 @@ export default async function AdminIdeasPage({
   const status = searchParams.status?.trim() || undefined
   const category = searchParams.category?.trim() || undefined
   const sort = (searchParams.sort === 'oldest' ? 'oldest' : 'newest') as 'newest' | 'oldest'
+  const tab = (searchParams.tab === 'closed' ? 'closed' : 'active') as 'active' | 'closed'
 
-  const ideas = await ideaRepository.findAllWithFilters({ search, status, category, sort })
+  const [ideas, activeIdeas, closedIdeas] = await Promise.all([
+    ideaRepository.findAllWithFilters({ search, status, category, sort, tab }),
+    ideaRepository.findAllWithFilters({ tab: 'active' }),
+    ideaRepository.findAllWithFilters({ tab: 'closed' }),
+  ])
 
   const hasFilters = !!(search || status || category || searchParams.sort)
 
@@ -56,6 +62,11 @@ export default async function AdminIdeasPage({
               <AdminFilters />
             </Suspense>
           </div>
+
+          {/* Tabs */}
+          <Suspense>
+            <AdminQueueTabs activeCount={activeIdeas.length} closedCount={closedIdeas.length} />
+          </Suspense>
 
           {ideas.length === 0 ? (
             <div className="bg-background rounded-lg border border-border p-12 text-center">

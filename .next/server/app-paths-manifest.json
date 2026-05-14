@@ -1,4 +1,7 @@
 {
-  "/ideas/drafts/page": "app/ideas/drafts/page.js",
-  "/ideas/[ideaId]/edit/page": "app/ideas/[ideaId]/edit/page.js"
+  "/page": "app/page.js",
+  "/ideas/[ideaId]/edit/page": "app/ideas/[ideaId]/edit/page.js",
+  "/ideas/page": "app/ideas/page.js",
+  "/ideas/new/page": "app/ideas/new/page.js",
+  "/admin/ideas/page": "app/admin/ideas/page.js"
 }

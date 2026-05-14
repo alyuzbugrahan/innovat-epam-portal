@@ -47,6 +47,30 @@ export class IdeaRepository {
     })
   }
 
+  async findBySubmitterWithFilters({
+    submitterId,
+    search,
+    status,
+    category,
+    sort,
+  }: {
+    submitterId: string
+    search?: string
+    status?: string
+    category?: string
+    sort?: 'newest' | 'oldest'
+  }): Promise<Idea[]> {
+    return prisma.idea.findMany({
+      where: {
+        submitterId,
+        status: status ? status : { not: 'DRAFT' },
+        ...(search ? { title: { contains: search } } : {}),
+        ...(category ? { category } : {}),
+      },
+      orderBy: { createdAt: sort === 'oldest' ? 'asc' : 'desc' },
+    })
+  }
+
   async findAll() {
     return prisma.idea.findMany({
       where: {
@@ -64,15 +88,33 @@ export class IdeaRepository {
     status,
     category,
     sort,
+    tab,
   }: {
     search?: string
     status?: string
     category?: string
     sort?: 'newest' | 'oldest'
+    tab?: 'active' | 'closed' | 'all'
   } = {}) {
+    const ACTIVE_STATUSES = ['SUBMITTED', 'INITIAL_SCREENING', 'TECHNICAL_REVIEW', 'BUSINESS_REVIEW']
+    const CLOSED_STATUSES = ['ACCEPTED', 'REJECTED']
+
+    let statusFilter: any
+    if (status) {
+      // Explicit status filter from dropdown takes precedence
+      statusFilter = status
+    } else if (tab === 'closed') {
+      statusFilter = { in: CLOSED_STATUSES }
+    } else if (tab === 'all') {
+      statusFilter = { not: 'DRAFT' }
+    } else {
+      // 'active' is the default
+      statusFilter = { in: ACTIVE_STATUSES }
+    }
+
     return prisma.idea.findMany({
       where: {
-        status: status ? status : { not: 'DRAFT' },
+        status: statusFilter,
         ...(search ? { title: { contains: search } } : {}),
         ...(category ? { category } : {}),
       },
@@ -133,6 +175,10 @@ export class IdeaRepository {
         reviewedAt,
       },
     })
+  }
+
+  async deleteById(ideaId: string): Promise<void> {
+    await prisma.idea.delete({ where: { id: ideaId } })
   }
 }
 

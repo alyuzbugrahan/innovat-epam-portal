@@ -176,6 +176,28 @@ export class IdeaService {
       return failure(ERROR_CODES.INTERNAL_ERROR, 'Failed to update draft')
     }
   }
+
+  /**
+   * Delete a draft idea owned by the submitter.
+   */
+  async deleteIdea(ideaId: string, userId: string): Promise<Result<void>> {
+    try {
+      const idea = await ideaRepository.findById(ideaId)
+      if (!idea) {
+        return failure(ERROR_CODES.NOT_FOUND, 'Idea not found')
+      }
+      if (idea.submitterId !== userId) {
+        return failure(ERROR_CODES.FORBIDDEN, 'You do not have permission to delete this idea')
+      }
+      if (idea.status !== 'DRAFT') {
+        return failure(ERROR_CODES.CONFLICT, 'Only draft ideas can be deleted')
+      }
+      await ideaRepository.deleteById(ideaId)
+      return success(undefined)
+    } catch (error) {
+      return failure(ERROR_CODES.INTERNAL_ERROR, 'Failed to delete idea')
+    }
+  }
 }
 
 export const ideaService = new IdeaService()

@@ -1,14 +1,9 @@
 {
   "pages": {
-    "/ideas/[ideaId]/edit/page": [
+    "/ideas/drafts/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/edit/page.js"
-    ],
-    "/ideas/[ideaId]/loading": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/loading.js"
+      "static/chunks/app/ideas/drafts/page.js"
     ],
     "/ideas/loading": [
       "static/chunks/webpack.js",
@@ -21,11 +16,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/ideas/drafts/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/drafts/page.js"
-    ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -35,6 +25,31 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/ideas/page.js"
+    ],
+    "/ideas/[ideaId]/edit/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/edit/page.js"
+    ],
+    "/ideas/[ideaId]/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/loading.js"
+    ],
+    "/ideas/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/new/page.js"
+    ],
+    "/admin/ideas/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/ideas/page.js"
+    ],
+    "/admin/ideas/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/ideas/loading.js"
     ]
   }
 }
