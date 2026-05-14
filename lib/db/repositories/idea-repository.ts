@@ -14,7 +14,10 @@ export class IdeaRepository {
           orderBy: { createdAt: 'asc' },
         },
         evaluations: {
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'asc' },
+          include: {
+            evaluator: { select: { id: true, name: true, email: true } },
+          },
         },
         submitter: {
           select: {
@@ -44,12 +47,39 @@ export class IdeaRepository {
     })
   }
 
-  async findAll(): Promise<Idea[]> {
+  async findAll() {
     return prisma.idea.findMany({
       where: {
         status: { not: 'DRAFT' },
       },
       orderBy: { createdAt: 'desc' },
+      include: {
+        submitter: { select: { id: true, name: true } },
+      },
+    })
+  }
+
+  async findAllWithFilters({
+    search,
+    status,
+    category,
+    sort,
+  }: {
+    search?: string
+    status?: string
+    category?: string
+    sort?: 'newest' | 'oldest'
+  } = {}) {
+    return prisma.idea.findMany({
+      where: {
+        status: status ? status : { not: 'DRAFT' },
+        ...(search ? { title: { contains: search } } : {}),
+        ...(category ? { category } : {}),
+      },
+      orderBy: { createdAt: sort === 'oldest' ? 'asc' : 'desc' },
+      include: {
+        submitter: { select: { id: true, name: true } },
+      },
     })
   }
 

@@ -4,87 +4,103 @@
 
 import { requireRole } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
-import { formatDate } from '@/lib/utils/dates'
+import { formatTimeAgo } from '@/lib/utils/dates'
 import Link from 'next/link'
+import NavBar from '@/components/layout/navbar'
+import StatusBadge from '@/components/ui/status-badge'
+import AdminQueueRefresher from '@/components/admin/admin-queue-refresher'
+import AdminSearchBar from '@/components/admin/admin-search-bar'
+import AdminFilters from '@/components/admin/admin-filters'
+import { Suspense } from 'react'
 
-export default async function AdminIdeasPage() {
+export default async function AdminIdeasPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; status?: string; category?: string; sort?: string }
+}) {
   await requireRole('ADMIN')
 
-  // Fetch all ideas
-  const ideas = await ideaRepository.findAll()
+  const search = searchParams.q?.trim() || undefined
+  const status = searchParams.status?.trim() || undefined
+  const category = searchParams.category?.trim() || undefined
+  const sort = (searchParams.sort === 'oldest' ? 'oldest' : 'newest') as 'newest' | 'oldest'
+
+  const ideas = await ideaRepository.findAllWithFilters({ search, status, category, sort })
+
+  const hasFilters = !!(search || status || category || searchParams.sort)
 
   return (
-    <div className="min-h-screen bg-surface">
-      <nav className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-text">Admin: Ideas Queue</h1>
-            <Link href="/" className="text-primary hover:text-primary-dark">
-              Home
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <AdminQueueRefresher>
+      <div className="min-h-screen bg-surface">
+        <NavBar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {ideas.length === 0 ? (
-          <div className="bg-background rounded-lg shadow-lg p-8 border border-border text-center">
-            <h2 className="text-xl font-bold text-text mb-4">No Ideas to Review</h2>
-            <p className="text-text-muted">All ideas have been reviewed.</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page header */}
+          <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+            <div>
+              <h1 className="text-xl font-semibold text-text">Review Queue</h1>
+              <p className="mt-0.5 text-sm text-text-muted">
+                {hasFilters
+                  ? `${ideas.length} result${ideas.length !== 1 ? 's' : ''}`
+                  : `${ideas.length} idea${ideas.length !== 1 ? 's' : ''} in queue`}
+              </p>
+            </div>
+            <Suspense>
+              <AdminSearchBar />
+            </Suspense>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {ideas.map((idea) => (
-              <Link
-                key={idea.id}
-                href={`/admin/ideas/${idea.id}`}
-                className="block bg-background rounded-lg shadow-lg p-6 border border-border hover:border-primary transition-all hover:shadow-xl"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-text mb-2">{idea.title}</h3>
-                    <p className="text-text-muted text-sm mb-3">{idea.description.substring(0, 150)}...</p>
-                    <div className="flex gap-4 text-sm text-text-muted">
-                      <span>Category: {idea.category}</span>
-                      <span>Submitted: {formatDate(idea.createdAt)}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium text-white ${getStatusColor(
-                      idea.status
-                    )}`}>
-                      {formatStatus(idea.status)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+
+          {/* Filters row */}
+          <div className="mb-6">
+            <Suspense>
+              <AdminFilters />
+            </Suspense>
           </div>
-        )}
-      </main>
-    </div>
+
+          {ideas.length === 0 ? (
+            <div className="bg-background rounded-lg border border-border p-12 text-center">
+              <h2 className="text-base font-medium text-text mb-2">
+                {hasFilters ? 'No ideas found' : 'Queue is empty'}
+              </h2>
+              <p className="text-sm text-text-muted">
+                {hasFilters
+                  ? 'No ideas match the current filters. Try adjusting your search or filters.'
+                  : 'No ideas have been submitted yet. New submissions will appear here automatically.'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-background rounded-lg border border-border overflow-hidden">
+              <ul role="list" className="divide-y divide-border">
+                {ideas.map((idea) => (
+                  <li key={idea.id}>
+                    <Link
+                      href={`/admin/ideas/${idea.id}`}
+                      className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-surface transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium text-text truncate">{idea.title}</p>
+                          <span className="text-xs px-2 py-0.5 rounded bg-surface-dark text-text-muted border border-border shrink-0">
+                            {idea.category}
+                          </span>
+                        </div>
+                        <p className="text-xs text-text-muted mt-0.5">
+                          {idea.blindReview && idea.status !== 'ACCEPTED' && idea.status !== 'REJECTED'
+                            ? 'Anonymous'
+                            : (idea.submitter?.name ?? 'Unknown')}{' '}
+                          &middot; {formatTimeAgo(idea.createdAt)}
+                        </p>
+                      </div>
+                      <StatusBadge status={idea.status} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </main>
+      </div>
+    </AdminQueueRefresher>
   )
 }
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'SUBMITTED':
-      return 'bg-secondary'
-    case 'INITIAL_SCREENING':
-      return 'bg-warning-light'
-    case 'TECHNICAL_REVIEW':
-      return 'bg-primary'
-    case 'BUSINESS_REVIEW':
-      return 'bg-secondary-light'
-    case 'ACCEPTED':
-      return 'bg-success'
-    case 'REJECTED':
-      return 'bg-error'
-    default:
-      return 'bg-secondary'
-  }
-}
-
-function formatStatus(status: string): string {
-  return status.replace(/_/g, ' ')
-}

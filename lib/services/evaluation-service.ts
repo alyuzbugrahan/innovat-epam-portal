@@ -26,7 +26,8 @@ export class EvaluationService {
     evaluatorId: string,
     toStatus: string,
     comment: string,
-    score?: number
+    score?: number,
+    recommendation?: string | null
   ): Promise<Result<void>> {
     try {
       // Fetch current idea
@@ -64,7 +65,8 @@ export class EvaluationService {
         fromStatus,
         toStatus,
         comment,
-        score
+        score,
+        recommendation
       )
 
       // Update idea status

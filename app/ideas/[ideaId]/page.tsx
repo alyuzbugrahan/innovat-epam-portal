@@ -6,6 +6,10 @@ import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
 import { parseIdeaDescription, getMetadataLabel } from '@/lib/utils/idea-metadata'
+import { STATUS_FULL_LABELS } from '@/lib/utils/status'
+import Breadcrumb from '@/components/ui/breadcrumb'
+import NavBar from '@/components/layout/navbar'
+import StatusBadge from '@/components/ui/status-badge'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -32,72 +36,69 @@ export default async function IdeaDetailPage({
 
   return (
     <div className="min-h-screen bg-surface">
-      <nav className="bg-background border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-text">Idea Details</h1>
-            <Link href="/ideas" className="text-primary hover:text-primary-dark">
-              Back to My Ideas
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <NavBar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-background rounded-lg shadow-lg p-8 border border-border">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-text mb-2">{idea.title}</h1>
-              <p className="text-text-muted">Category: {idea.category}</p>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Breadcrumb items={[{ label: 'My Ideas', href: '/ideas' }, { label: idea.title }]} />
+
+        <div className="bg-background rounded-lg border border-border overflow-hidden">
+          {/* Idea header */}
+          <div className="px-6 py-5 border-b border-border">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-semibold text-text">{idea.title}</h1>
+                <p className="text-sm text-text-muted mt-1">{idea.category}</p>
+              </div>
+              <StatusBadge status={idea.status} size="md" />
             </div>
-            <span className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${getStatusColor(idea.status)}`}>
-              {formatStatus(idea.status)}
-            </span>
           </div>
 
-          <div className="border-t border-border pt-6 mb-6">
-            <h2 className="text-lg font-bold text-text mb-4">Description</h2>
-            <p className="text-text-muted whitespace-pre-wrap">{description}</p>
+          {/* Description */}
+          <div className="px-6 py-5 border-b border-border">
+            <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Description</h2>
+            <p className="text-sm text-text whitespace-pre-wrap leading-relaxed">{description}</p>
           </div>
 
+          {/* Category details */}
           {metadata && Object.keys(metadata).length > 0 && (
-            <div className="border-t border-border pt-6 mb-6">
-              <h2 className="text-lg font-bold text-text mb-4">Category Details</h2>
+            <div className="px-6 py-5 border-b border-border">
+              <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Category Details</h2>
               <div className="space-y-3">
                 {Object.entries(metadata).map(([key, value]) => (
-                  <div key={key} className="bg-surface-dark rounded-lg p-3 border border-border">
-                    <p className="text-sm text-text-muted">{getMetadataLabel(key)}</p>
-                    <p className="text-text font-medium">{value}</p>
+                  <div key={key}>
+                    <p className="text-xs text-text-muted mb-0.5">{getMetadataLabel(key)}</p>
+                    <p className="text-sm text-text font-medium">{value}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Attachments */}
           {attachments.length > 0 && (
-            <div className="border-t border-border pt-6 mb-6">
-              <h2 className="text-lg font-bold text-text mb-4">Attachments</h2>
+            <div className="px-6 py-5 border-b border-border">
+              <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Attachments</h2>
               <ul className="space-y-2">
                 {attachments.map((attachment) => {
                   const fileName = attachment.storagePath.split('/').pop() || attachment.storagePath
                   return (
                     <li
                       key={attachment.id}
-                      className="flex items-center justify-between p-3 bg-surface-dark rounded-lg border border-border"
+                      className="flex items-center justify-between py-2 px-3 bg-surface rounded-md border border-border"
                     >
                       <div>
-                        <p className="text-text font-medium">{attachment.originalName}</p>
-                        <p className="text-xs text-text-muted">
-                          {(attachment.sizeBytes / 1024).toFixed(2)} KB
+                        <p className="text-sm text-text font-medium">{attachment.originalName}</p>
+                        <p className="text-xs text-text-muted mt-0.5">
+                          {(attachment.sizeBytes / 1024).toFixed(1)} KB
                         </p>
                       </div>
                       <a
                         href={`/uploads/${fileName}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block bg-primary text-white px-4 py-1 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+                        className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
                       >
-                        View
+                        Download
                       </a>
                     </li>
                   )
@@ -106,29 +107,35 @@ export default async function IdeaDetailPage({
             </div>
           )}
 
+          {/* Evaluator feedback */}
           {(idea.currentComment || latestScoredEvaluation?.score != null) && (
-            <div className="border-t border-border pt-6 mb-6">
-              <h2 className="text-lg font-bold text-text mb-4">Evaluator Comment</h2>
-              <div className="bg-surface-dark rounded-lg p-4 border border-border">
-                {idea.currentComment && <p className="text-text">{idea.currentComment}</p>}
+            <div className="px-6 py-5 border-b border-border">
+              <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Evaluator Feedback</h2>
+              <div className="bg-surface rounded-md border border-border p-4">
+                {idea.currentComment && (
+                  <p className="text-sm text-text leading-relaxed">{idea.currentComment}</p>
+                )}
                 {latestScoredEvaluation?.score != null && (
-                  <p className="text-text mt-2">Score: {latestScoredEvaluation.score}/5</p>
+                  <p className="text-sm text-text-muted mt-2">
+                    Score: <span className="font-medium text-text">{latestScoredEvaluation.score} / 5</span>
+                  </p>
                 )}
                 {idea.reviewedAt && (
-                  <p className="text-sm text-text-muted mt-2">
-                    Reviewed: {formatDateTime(idea.reviewedAt)}
+                  <p className="text-xs text-text-muted mt-2">
+                    Reviewed {formatDateTime(idea.reviewedAt)}
                   </p>
                 )}
               </div>
             </div>
           )}
 
-          <div className="border-t border-border pt-6">
-            <h2 className="text-lg font-bold text-text mb-4">Timeline</h2>
-            <div className="space-y-2 text-sm text-text-muted">
-              <p>Submitted: {formatDateTime(idea.createdAt)}</p>
+          {/* Timeline */}
+          <div className="px-6 py-5">
+            <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Timeline</h2>
+            <div className="space-y-1 text-xs text-text-muted">
+              <p>Submitted {formatDateTime(idea.createdAt)}</p>
               {idea.updatedAt !== idea.createdAt && (
-                <p>Last Updated: {formatDateTime(idea.updatedAt)}</p>
+                <p>Last updated {formatDateTime(idea.updatedAt)}</p>
               )}
             </div>
           </div>
@@ -138,25 +145,3 @@ export default async function IdeaDetailPage({
   )
 }
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'SUBMITTED':
-      return 'bg-secondary'
-    case 'INITIAL_SCREENING':
-      return 'bg-warning-light'
-    case 'TECHNICAL_REVIEW':
-      return 'bg-primary'
-    case 'BUSINESS_REVIEW':
-      return 'bg-secondary-light'
-    case 'ACCEPTED':
-      return 'bg-success'
-    case 'REJECTED':
-      return 'bg-error'
-    default:
-      return 'bg-secondary'
-  }
-}
-
-function formatStatus(status: string): string {
-  return status.replace(/_/g, ' ')
-}

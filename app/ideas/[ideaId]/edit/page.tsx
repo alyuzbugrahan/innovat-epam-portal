@@ -5,9 +5,10 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { parseIdeaDescription } from '@/lib/utils/idea-metadata'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import IdeaForm from '@/components/forms/idea-form'
+import Breadcrumb from '@/components/ui/breadcrumb'
+import NavBar from '@/components/layout/navbar'
 
 export default async function EditDraftPage({
   params,
@@ -31,20 +32,15 @@ export default async function EditDraftPage({
 
   return (
     <div className="min-h-screen bg-surface">
-      <nav className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-text">Edit Draft</h1>
-            <Link href="/ideas/drafts" className="text-primary hover:text-primary-dark">
-              Back to Drafts
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <NavBar />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-background rounded-lg shadow-lg p-8 border border-border">
-          <h1 className="text-2xl font-bold text-text mb-6">Update Draft Idea</h1>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Breadcrumb items={[{ label: 'My Ideas', href: '/ideas' }, { label: 'Drafts', href: '/ideas/drafts' }, { label: 'Edit Draft' }]} />
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-text">Edit draft</h1>
+          <p className="mt-1 text-sm text-text-muted">Update your draft and submit when ready.</p>
+        </div>
+        <div className="bg-background rounded-lg border border-border p-6">
           <IdeaForm
             mode="edit"
             ideaId={idea.id}
@@ -54,6 +50,11 @@ export default async function EditDraftPage({
               category: idea.category,
               blindReview: idea.blindReview,
               metadata: metadata || undefined,
+              existingAttachments: idea.attachments.map((a) => ({
+                id: a.id,
+                originalName: a.originalName,
+                sizeBytes: a.sizeBytes,
+              })),
             }}
           />
         </div>

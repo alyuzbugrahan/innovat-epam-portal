@@ -36,6 +36,12 @@ export class AttachmentRepository {
       where: { ideaId },
     })
   }
+
+  async deleteById(id: string): Promise<IdeaAttachment | null> {
+    return prisma.ideaAttachment.delete({
+      where: { id },
+    }).catch(() => null)
+  }
 }
 
 export const attachmentRepository = new AttachmentRepository()

@@ -5,7 +5,10 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDate } from '@/lib/utils/dates'
+import { parseIdeaDescription } from '@/lib/utils/idea-metadata'
 import Link from 'next/link'
+import NavBar from '@/components/layout/navbar'
+import StatusBadge from '@/components/ui/status-badge'
 
 export default async function IdeasListPage() {
   const session = await requireAuth()
@@ -16,61 +19,59 @@ export default async function IdeasListPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <nav className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-text">My Ideas</h1>
-            <div className="flex gap-4">
-              <Link href="/ideas/new" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">
-                New Idea
-              </Link>
-              <Link href="/ideas/drafts" className="bg-warning-light text-white px-4 py-2 rounded-lg hover:bg-warning">
-                Drafts
-              </Link>
-              <Link href="/" className="text-primary hover:text-primary-dark">
-                Home
-              </Link>
-            </div>
+      <NavBar />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-text">My Ideas</h1>
+            <p className="mt-0.5 text-sm text-text-muted">{ideas.length} submitted idea{ideas.length !== 1 ? 's' : ''}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/ideas/drafts"
+              className="text-sm px-3 py-1.5 rounded-md border border-border text-text-muted hover:text-text hover:bg-surface-dark transition-colors"
+            >
+              Drafts
+            </Link>
+            <Link
+              href="/ideas/new"
+              className="text-sm px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
+            >
+              New idea
+            </Link>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {ideas.length === 0 ? (
-          <div className="bg-background rounded-lg shadow-lg p-8 border border-border text-center">
-            <h2 className="text-xl font-bold text-text mb-4">No Ideas Yet</h2>
-            <p className="text-text-muted mb-6">You haven't submitted any ideas yet.</p>
-            <Link href="/ideas/new" className="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
-              Submit Your First Idea
+          <div className="bg-background rounded-lg border border-border p-12 text-center">
+            <h2 className="text-base font-medium text-text mb-2">No ideas yet</h2>
+            <p className="text-sm text-text-muted mb-6">
+              Submit your first innovation idea to share it with the team.
+            </p>
+            <Link
+              href="/ideas/new"
+              className="inline-flex items-center text-sm font-medium bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              Submit an idea
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {ideas.map((idea) => (
               <Link
                 key={idea.id}
                 href={`/ideas/${idea.id}`}
-                className="block bg-background rounded-lg shadow-lg p-6 border border-border hover:border-primary transition-all hover:shadow-xl"
+                className="flex items-center justify-between gap-4 bg-background rounded-lg border border-border px-5 py-4 hover:border-primary/50 hover:bg-surface/50 transition-all"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-text mb-2">{idea.title}</h3>
-                    <p className="text-text-muted text-sm mb-3">{idea.description.substring(0, 150)}...</p>
-                    <div className="flex gap-4 text-sm text-text-muted">
-                      <span>Category: {idea.category}</span>
-                      <span>Submitted: {formatDate(idea.createdAt)}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                        idea.status
-                      )}`}
-                    >
-                      {formatStatus(idea.status)}
-                    </span>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text truncate">{idea.title}</p>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {idea.category} &middot; {formatDate(idea.createdAt)}
+                  </p>
                 </div>
+                <StatusBadge status={idea.status} />
               </Link>
             ))}
           </div>
@@ -80,27 +81,3 @@ export default async function IdeasListPage() {
   )
 }
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case 'SUBMITTED':
-      return 'bg-secondary-light text-white'
-    case 'DRAFT':
-      return 'bg-warning-light text-white'
-    case 'INITIAL_SCREENING':
-      return 'bg-warning-light text-white'
-    case 'TECHNICAL_REVIEW':
-      return 'bg-primary text-white'
-    case 'BUSINESS_REVIEW':
-      return 'bg-secondary text-white'
-    case 'ACCEPTED':
-      return 'bg-success text-white'
-    case 'REJECTED':
-      return 'bg-error text-white'
-    default:
-      return 'bg-secondary text-white'
-  }
-}
-
-function formatStatus(status: string): string {
-  return status.replace(/_/g, ' ')
-}

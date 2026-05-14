@@ -38,7 +38,7 @@ export async function PATCH(
       )
     }
 
-    const { toStatus, comment, score } = validationResult.data
+    const { toStatus, comment, score, recommendation } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
@@ -48,7 +48,8 @@ export async function PATCH(
       user.id,
       toStatus,
       comment,
-      score
+      score,
+      recommendation
     )
 
     if (!result.ok) {

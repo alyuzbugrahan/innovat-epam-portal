@@ -1,9 +1,4 @@
 {
-  "/ideas/page": "app/ideas/page.js",
-  "/page": "app/page.js",
-  "/api/admin/ideas/[ideaId]/status/route": "app/api/admin/ideas/[ideaId]/status/route.js",
-  "/admin/ideas/page": "app/admin/ideas/page.js",
-  "/admin/ideas/[ideaId]/page": "app/admin/ideas/[ideaId]/page.js",
-  "/ideas/new/page": "app/ideas/new/page.js",
-  "/ideas/[ideaId]/page": "app/ideas/[ideaId]/page.js"
+  "/ideas/drafts/page": "app/ideas/drafts/page.js",
+  "/ideas/[ideaId]/edit/page": "app/ideas/[ideaId]/edit/page.js"
 }

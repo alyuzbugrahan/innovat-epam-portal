@@ -6,10 +6,13 @@ import { prisma } from '@/lib/db/prisma'
 import { Evaluation } from '@prisma/client'
 
 export class EvaluationRepository {
-  async findByIdeaId(ideaId: string): Promise<Evaluation[]> {
+  async findByIdeaId(ideaId: string) {
     return prisma.evaluation.findMany({
       where: { ideaId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'asc' }, // chronological — oldest first
+      include: {
+        evaluator: { select: { id: true, name: true, email: true } },
+      },
     })
   }
 
@@ -19,7 +22,8 @@ export class EvaluationRepository {
     fromStatus: string,
     toStatus: string,
     comment: string,
-    score?: number
+    score?: number,
+    recommendation?: string | null
   ): Promise<Evaluation> {
     return prisma.evaluation.create({
       data: {
@@ -29,6 +33,7 @@ export class EvaluationRepository {
         toStatus,
         comment,
         score,
+        recommendation,
       },
     })
   }

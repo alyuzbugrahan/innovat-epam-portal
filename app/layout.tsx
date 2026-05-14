@@ -1,11 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { getSession } from '@/lib/auth/guards'
+import { ToastProvider } from '@/components/ui/toast-provider'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'InnovatEPAM Portal',
   description: 'Submit and manage innovation ideas',
-  viewport: 'width=device-width, initial-scale=1, minimum-scale=1',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
 }
 
 export default async function RootLayout({
@@ -18,9 +24,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen bg-background">
-          {children}
-        </div>
+        <ToastProvider>
+          <div className="min-h-screen bg-background">
+            {children}
+          </div>
+        </ToastProvider>
       </body>
     </html>
   )

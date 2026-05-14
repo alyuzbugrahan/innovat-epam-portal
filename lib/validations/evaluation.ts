@@ -14,6 +14,7 @@ export const evaluateIdeaSchema = z.object({
     .max(2000, { message: 'Comment must be at most 2000 characters' })
     .optional()
     .default(''),
+  recommendation: z.enum(['APPROVE', 'REJECT']).nullable().optional(),
 })
 
 export type EvaluateIdeaInput = z.infer<typeof evaluateIdeaSchema>

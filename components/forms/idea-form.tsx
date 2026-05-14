@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/lib/hooks/use-toast'
+import { X } from 'lucide-react'
 
 const CATEGORIES = [
   { value: 'Technology', label: 'Technology' },
@@ -29,12 +31,19 @@ const CATEGORY_FIELDS: Record<string, { label: string; name: string; placeholder
   },
 }
 
+interface ExistingAttachment {
+  id: string
+  originalName: string
+  sizeBytes: number
+}
+
 interface IdeaFormInitialValues {
   title: string
   description: string
   category: string
   blindReview?: boolean
   metadata?: Record<string, string | undefined>
+  existingAttachments?: ExistingAttachment[]
 }
 
 interface IdeaFormProps {
@@ -50,12 +59,21 @@ export default function IdeaForm({
 }: IdeaFormProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
+  const [descriptionLength, setDescriptionLength] = useState(initialValues?.description?.length ?? 0)
   const [error, setError] = useState('')
   const [category, setCategory] = useState(initialValues?.category || 'Other')
   const [blindReview, setBlindReview] = useState(initialValues?.blindReview ?? false)
   const [files, setFiles] = useState<File[]>([])
+  const [existingAttachments, setExistingAttachments] = useState<ExistingAttachment[]>(
+    initialValues?.existingAttachments ?? []
+  )
+  const [removingId, setRemovingId] = useState<string | null>(null)
   const [submitAction, setSubmitAction] = useState<'draft' | 'submit'>('submit')
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
+  const { showToast } = useToast()
 
   function getErrorMessage(payload: any, fallback: string): string {
     const details = payload?.error?.details
@@ -66,6 +84,38 @@ export default function IdeaForm({
       : null
 
     return firstDetail || payload?.error?.message || fallback
+  }
+
+  async function handleRemoveExisting(attachmentId: string) {
+    if (!ideaId) return
+    setRemovingId(attachmentId)
+    try {
+      const res = await fetch(`/api/ideas/${ideaId}/attachments/${attachmentId}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        setExistingAttachments((prev) => prev.filter((a) => a.id !== attachmentId))
+      } else {
+        showToast('Failed to remove attachment', 'error')
+      }
+    } catch {
+      showToast('Failed to remove attachment', 'error')
+    } finally {
+      setRemovingId(null)
+    }
+  }
+
+  function handleCancelClick() {
+    const titleVal = titleRef.current?.value?.trim() ?? ''
+    const descriptionVal = descriptionRef.current?.value?.trim() ?? ''
+    // Category always has a value (defaulted to 'Other'), so only
+    // title and description are meaningful dirty signals.
+    const isDirty = titleVal !== '' || descriptionVal !== ''
+    if (!isDirty) {
+      router.push('/ideas')
+    } else {
+      setIsCancelDialogOpen(true)
+    }
   }
 
   function handleActionClick(action: 'draft' | 'submit') {
@@ -130,6 +180,7 @@ export default function IdeaForm({
         if (!updateResponse.ok) {
           const errorMsg = getErrorMessage(updateData, 'Failed to update draft')
           setError(errorMsg)
+          showToast(errorMsg, 'error')
           return
         }
       } else {
@@ -150,6 +201,7 @@ export default function IdeaForm({
         if (!createResponse.ok) {
           const errorMsg = getErrorMessage(createData, 'Failed to create idea')
           setError(errorMsg)
+          showToast(errorMsg, 'error')
           return
         }
 
@@ -175,7 +227,9 @@ export default function IdeaForm({
 
         if (!uploadResponse.ok) {
           const uploadData = await uploadResponse.json().catch(() => null)
-          setError(uploadData?.error?.message || 'Idea saved but file upload failed')
+          const uploadErr = uploadData?.error?.message || 'Idea saved but file upload failed'
+          setError(uploadErr)
+          showToast(uploadErr, 'error')
           // Still redirect since idea save succeeded
           setTimeout(() => {
             if (targetStatus === 'DRAFT') {
@@ -189,14 +243,17 @@ export default function IdeaForm({
       }
 
       if (targetStatus === 'DRAFT') {
+        showToast('Draft saved', 'success')
         router.push('/ideas/drafts')
         return
       }
 
+      showToast('Idea submitted successfully', 'success')
       router.push(`/ideas/${currentIdeaId}`)
     } catch (err) {
       const errorMsg = 'An error occurred. Please try again.'
       setError(errorMsg)
+      showToast(errorMsg, 'error')
     } finally {
       setLoading(false)
     }
@@ -207,7 +264,7 @@ export default function IdeaForm({
   return (
     <>
       {error && (
-        <div className="mb-4 p-4 bg-error-light text-error rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
           {error}
         </div>
       )}
@@ -221,6 +278,7 @@ export default function IdeaForm({
             id="title"
             type="text"
             name="title"
+            ref={titleRef}
             required
             disabled={loading}
             defaultValue={initialValues?.title || ''}
@@ -238,6 +296,7 @@ export default function IdeaForm({
           <textarea
             id="description"
             name="description"
+            ref={descriptionRef}
             required
             disabled={loading}
             defaultValue={initialValues?.description || ''}
@@ -245,8 +304,12 @@ export default function IdeaForm({
             minLength={10}
             maxLength={5000}
             rows={6}
+            onChange={(e) => setDescriptionLength(e.target.value.length)}
             className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark resize-none"
           />
+          <p className={`text-xs text-right mt-1 ${descriptionLength > 1800 ? 'text-error' : 'text-text-muted'}`}>
+            {descriptionLength} / 5000
+          </p>
         </div>
 
         <div>
@@ -271,7 +334,7 @@ export default function IdeaForm({
         </div>
 
         {extraField && (
-          <div className="p-4 bg-primary-light rounded-lg border border-primary">
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <label
               htmlFor={extraField.name}
               className="block text-sm font-medium text-text mb-1"
@@ -287,10 +350,10 @@ export default function IdeaForm({
               defaultValue={initialValues?.metadata?.[extraField.name] || ''}
               placeholder={extraField.placeholder}
               maxLength={200}
-              className="w-full px-3 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-surface-dark"
+              className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white disabled:bg-surface-dark"
             />
-            <p className="text-xs text-text-muted mt-2">
-              This field is required for the <strong>{category}</strong> category.
+            <p className="text-xs text-blue-600 mt-2">
+              Required for the <strong>{category}</strong> category.
             </p>
           </div>
         )}
@@ -331,6 +394,26 @@ export default function IdeaForm({
           <p className="text-xs text-text-muted mt-1">
             Max 10 MB per file. Supported: PDF, images, documents
           </p>
+          {existingAttachments.length > 0 && (
+            <ul className="mt-3 space-y-1">
+              {existingAttachments.map((att) => (
+                <li key={att.id} className="flex items-center justify-between text-xs px-3 py-2 bg-surface rounded-lg border border-border">
+                  <span className="text-text truncate">{att.originalName}</span>
+                  <span className="flex items-center gap-3 shrink-0 ml-2">
+                    <span className="text-text-muted">{(att.sizeBytes / 1024).toFixed(1)} KB</span>
+                    <button
+                      type="button"
+                      disabled={removingId === att.id || loading}
+                      onClick={() => handleRemoveExisting(att.id)}
+                      className="text-error hover:underline disabled:opacity-50"
+                    >
+                      {removingId === att.id ? 'Removing…' : 'Remove'}
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
           {files.length > 0 && (
             <ul className="mt-2 space-y-1 text-xs text-text-muted">
               {files.map((file) => (
@@ -342,33 +425,80 @@ export default function IdeaForm({
           )}
         </div>
 
-        <div className="flex gap-4">
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => handleActionClick('draft')}
-            className="flex-1 bg-warning-light text-white font-medium py-2 rounded-lg hover:bg-warning disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Saving...' : mode === 'edit' ? 'Save Draft' : 'Save as Draft'}
-          </button>
+        <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
             disabled={loading}
             onClick={() => handleActionClick('submit')}
-            className="flex-1 bg-primary text-white font-medium py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 bg-primary text-white font-medium py-2 px-4 rounded-lg text-sm hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Submitting...' : mode === 'edit' ? 'Submit' : 'Submit Idea'}
+            {loading ? 'Submitting…' : mode === 'edit' ? 'Submit' : 'Submit idea'}
           </button>
           <button
             type="button"
             disabled={loading}
-            onClick={() => router.back()}
-            className="flex-1 bg-secondary text-white font-medium py-2 rounded-lg hover:bg-secondary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={() => handleActionClick('draft')}
+            className="px-4 py-2 rounded-lg text-sm border border-border text-text-muted font-medium hover:text-text hover:bg-surface-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Saving…' : mode === 'edit' ? 'Save draft' : 'Save as draft'}
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleCancelClick}
+            className="px-4 py-2 rounded-lg text-sm text-text-muted hover:text-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Cancel
           </button>
         </div>
       </form>
+
+      {/* Cancel confirmation dialog */}
+      {isCancelDialogOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={(e) => { if (e.target === e.currentTarget) setIsCancelDialogOpen(false) }}
+        >
+          <div className="relative w-full max-w-sm mx-4 bg-background rounded-xl border border-border shadow-lg p-6">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setIsCancelDialogOpen(false)}
+              className="absolute top-4 right-4 text-text-muted hover:text-text transition-colors"
+              aria-label="Close dialog"
+            >
+              <X size={18} />
+            </button>
+
+            <h2 className="text-base font-semibold text-text mb-2">Leave without submitting?</h2>
+            <p className="text-sm text-text-muted mb-6">
+              Your idea has not been submitted yet. Would you like to save it as a draft before leaving?
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => {
+                  setIsCancelDialogOpen(false)
+                  handleActionClick('draft')
+                }}
+                className="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg text-sm hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Saving…' : 'Save as Draft'}
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => router.push('/ideas')}
+                className="w-full py-2 px-4 rounded-lg text-sm border border-red-300 text-red-600 font-medium hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Discard &amp; Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
