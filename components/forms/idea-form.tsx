@@ -33,6 +33,7 @@ interface IdeaFormInitialValues {
   title: string
   description: string
   category: string
+  blindReview?: boolean
   metadata?: Record<string, string | undefined>
 }
 
@@ -51,9 +52,21 @@ export default function IdeaForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [category, setCategory] = useState(initialValues?.category || 'Other')
+  const [blindReview, setBlindReview] = useState(initialValues?.blindReview ?? false)
   const [files, setFiles] = useState<File[]>([])
   const [submitAction, setSubmitAction] = useState<'draft' | 'submit'>('submit')
   const router = useRouter()
+
+  function getErrorMessage(payload: any, fallback: string): string {
+    const details = payload?.error?.details
+    const firstDetail = details
+      ? Object.values(details)
+          .flat()
+          .find((message) => typeof message === 'string' && message.trim().length > 0)
+      : null
+
+    return firstDetail || payload?.error?.message || fallback
+  }
 
   function handleActionClick(action: 'draft' | 'submit') {
     flushSync(() => {
@@ -73,6 +86,7 @@ export default function IdeaForm({
     const title = formData.get('title') as string
     let description = formData.get('description') as string
     const selectedCategory = formData.get('category') as string
+    const shouldBlindReview = formData.get('blindReview') === 'on'
 
     // Add extra field metadata to description if it exists
     const extraFieldName = Object.keys(CATEGORY_FIELDS).find(
@@ -106,6 +120,7 @@ export default function IdeaForm({
             title,
             description,
             category: selectedCategory,
+            blindReview: shouldBlindReview,
             status: targetStatus,
           }),
         })
@@ -113,7 +128,7 @@ export default function IdeaForm({
         const updateData = await updateResponse.json()
 
         if (!updateResponse.ok) {
-          const errorMsg = updateData.error?.message || 'Failed to update draft'
+          const errorMsg = getErrorMessage(updateData, 'Failed to update draft')
           setError(errorMsg)
           return
         }
@@ -125,6 +140,7 @@ export default function IdeaForm({
             title,
             description,
             category: selectedCategory,
+            blindReview: shouldBlindReview,
             status: targetStatus,
           }),
         })
@@ -132,7 +148,7 @@ export default function IdeaForm({
         const createData = await createResponse.json()
 
         if (!createResponse.ok) {
-          const errorMsg = createData.error?.message || 'Failed to create idea'
+          const errorMsg = getErrorMessage(createData, 'Failed to create idea')
           setError(errorMsg)
           return
         }
@@ -278,6 +294,26 @@ export default function IdeaForm({
             </p>
           </div>
         )}
+
+        <div>
+          <label className="flex items-start gap-3 p-4 bg-surface-dark rounded-lg border border-border cursor-pointer">
+            <input
+              id="blindReview"
+              type="checkbox"
+              name="blindReview"
+              checked={blindReview}
+              disabled={loading}
+              onChange={(e) => setBlindReview(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary disabled:cursor-not-allowed"
+            />
+            <span>
+              <span className="block text-sm font-medium text-text">Enable blind review</span>
+              <span className="block text-xs text-text-muted mt-1">
+                Hide your identity from admins during review until a final decision is made.
+              </span>
+            </span>
+          </label>
+        </div>
 
         <div>
           <label htmlFor="files" className="block text-sm font-medium text-text mb-1">

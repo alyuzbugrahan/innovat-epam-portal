@@ -17,10 +17,11 @@ export class IdeaService {
     description: string,
     category: string,
     submitterId: string,
+    blindReview: boolean = false,
     status: 'DRAFT' | 'SUBMITTED' = 'SUBMITTED'
   ): Promise<Result<{ ideaId: string }>> {
     try {
-      const idea = await ideaRepository.create(title, description, category, submitterId, status)
+      const idea = await ideaRepository.create(title, description, category, submitterId, blindReview, status)
       return success({ ideaId: idea.id })
     } catch (error) {
       return failure(
@@ -145,6 +146,7 @@ export class IdeaService {
     title: string,
     description: string,
     category: string,
+    blindReview: boolean | undefined,
     status: 'DRAFT' | 'SUBMITTED'
   ): Promise<Result<Idea>> {
     try {
@@ -165,6 +167,7 @@ export class IdeaService {
         title,
         description,
         category,
+        blindReview,
         status,
       })
 

@@ -52,6 +52,7 @@ export default async function EditDraftPage({
               title: idea.title,
               description,
               category: idea.category,
+              blindReview: idea.blindReview,
               metadata: metadata || undefined,
             }}
           />

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAuth } from '@/lib/auth/guards'
 import { createIdeaSchema } from '@/lib/validations/idea'
 import { ideaService } from '@/lib/services/idea-service'
+import { ERROR_CODES } from '@/lib/utils/api-error'
 
 export async function GET(request: NextRequest) {
   const authResult = await checkAuth()
@@ -18,6 +19,19 @@ export async function GET(request: NextRequest) {
 
   const session = authResult.data
   const user = session.user as any
+
+  if (!user?.id) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: ERROR_CODES.UNAUTHORIZED,
+          message: 'User session is missing an id',
+        },
+      },
+      { status: 401 }
+    )
+  }
 
   // Submitters get only their own ideas
   const result = await ideaService.getSubmitterIdeas(user.id)
@@ -63,17 +77,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, description, category, status } = validationResult.data
+    const { title, description, category, blindReview, status } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
+    if (!user?.id) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: ERROR_CODES.UNAUTHORIZED,
+            message: 'User session is missing an id',
+          },
+        },
+        { status: 401 }
+      )
+    }
+
     // Create idea
-    const result = await ideaService.createIdea(title, description, category, user.id, status)
+    const result = await ideaService.createIdea(title, description, category, user.id, blindReview, status)
 
     if (!result.ok) {
+      const statusCode = result.error.code === ERROR_CODES.INTERNAL_ERROR ? 500 : 400
       return NextResponse.json(
         { ok: false, error: result.error },
-        { status: 400 }
+        { status: statusCode }
       )
     }
 

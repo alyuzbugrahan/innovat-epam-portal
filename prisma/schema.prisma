@@ -27,6 +27,7 @@ model Idea {
   title            String
   description      String
   category         String
+  blindReview      Boolean      @default(false)
   status           String       @default("SUBMITTED") // DRAFT | SUBMITTED | INITIAL_SCREENING | TECHNICAL_REVIEW | BUSINESS_REVIEW | ACCEPTED | REJECTED
   submitterId      String
   submitter        User         @relation(fields: [submitterId], references: [id], onDelete: Cascade)

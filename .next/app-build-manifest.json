@@ -11,11 +11,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(auth)/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(auth)/login/page.js"
-    ],
     "/ideas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,16 +26,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/ideas/new/page.js"
     ],
-    "/admin/ideas/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/ideas/page.js"
-    ],
-    "/admin/ideas/[ideaId]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/ideas/[ideaId]/page.js"
-    ],
     "/ideas/drafts/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -51,10 +36,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/ideas/[ideaId]/edit/page.js"
     ],
-    "/_not-found/page": [
+    "/(auth)/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/(auth)/login/page.js"
+    ],
+    "/admin/ideas/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/ideas/page.js"
+    ],
+    "/admin/ideas/[ideaId]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/ideas/[ideaId]/page.js"
     ]
   }
 }

@@ -27,6 +27,8 @@ export default async function AdminIdeaDetailPage({
   // Parse description to extract metadata
   const { description, metadata } = parseIdeaDescription(idea.description)
   const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
+  const isFinalDecision = idea.status === 'ACCEPTED' || idea.status === 'REJECTED'
+  const revealSubmitterIdentity = !idea.blindReview || isFinalDecision
 
   return (
     <div className="min-h-screen bg-surface">
@@ -53,8 +55,9 @@ export default async function AdminIdeaDetailPage({
             <h2 className="text-2xl font-bold text-text mb-2">{idea.title}</h2>
             <p className="text-text-muted">Category: {idea.category}</p>
             <p className="text-text-muted text-sm mt-2">
-              Submitted by: {idea.submitter?.name || 'Unknown'} on{' '}
-              {formatDateTime(idea.createdAt)}
+              {revealSubmitterIdentity
+                ? `Submitted by: ${idea.submitter?.name || 'Unknown'} (${idea.submitter?.email || 'Unknown email'})`
+                : 'Submitted by: Anonymous Submission'} on {formatDateTime(idea.createdAt)}
             </p>
             {idea.status && (
               <p className="text-text-muted text-sm mt-1">
