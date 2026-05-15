@@ -1,0 +1,20 @@
+/**
+ * Evaluation validation schemas.
+ */
+
+import { z } from 'zod'
+
+export const evaluateIdeaSchema = z.object({
+  toStatus: z.enum(['INITIAL_SCREENING', 'TECHNICAL_REVIEW', 'BUSINESS_REVIEW', 'ACCEPTED', 'REJECTED'], {
+    errorMap: () => ({ message: 'Invalid status transition' }),
+  }),
+  score: z.coerce.number().int().min(1).max(5).optional(),
+  comment: z
+    .string()
+    .max(2000, { message: 'Comment must be at most 2000 characters' })
+    .optional()
+    .default(''),
+  recommendation: z.enum(['APPROVE', 'REJECT']).nullable().optional(),
+})
+
+export type EvaluateIdeaInput = z.infer<typeof evaluateIdeaSchema>

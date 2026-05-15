@@ -1,0 +1,8 @@
+{
+  "/ideas/new/page": "app/ideas/new/page.js",
+  "/admin/ideas/[ideaId]/page": "app/admin/ideas/[ideaId]/page.js",
+  "/admin/ideas/page": "app/admin/ideas/page.js",
+  "/ideas/page": "app/ideas/page.js",
+  "/ideas/[ideaId]/edit/page": "app/ideas/[ideaId]/edit/page.js",
+  "/ideas/drafts/page": "app/ideas/drafts/page.js"
+}

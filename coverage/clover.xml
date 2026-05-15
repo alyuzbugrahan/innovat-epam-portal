@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1778800391286" clover="3.2.0">
+  <project timestamp="1778800391286" name="All files">
+    <metrics statements="134" coveredstatements="86" conditionals="72" coveredconditionals="43" methods="23" coveredmethods="16" elements="229" coveredelements="145" complexity="0" loc="134" ncloc="134" packages="4" files="9" classes="9"/>
+    <package name="services">
+      <metrics statements="93" coveredstatements="56" conditionals="52" coveredconditionals="29" methods="11" coveredmethods="7"/>
+      <file name="auth-service.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/services/auth-service.ts">
+        <metrics statements="19" coveredstatements="19" conditionals="6" coveredconditionals="6" methods="2" coveredmethods="2"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="19" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="28" count="2" type="stmt"/>
+        <line num="29" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="48" count="4" type="stmt"/>
+        <line num="49" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="50" count="1" type="stmt"/>
+        <line num="56" count="3" type="stmt"/>
+        <line num="57" count="3" type="stmt"/>
+        <line num="58" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="59" count="1" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
+        <line num="80" count="1" type="stmt"/>
+      </file>
+      <file name="evaluation-service.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/services/evaluation-service.ts">
+        <metrics statements="20" coveredstatements="16" conditionals="24" coveredconditionals="15" methods="1" coveredmethods="1"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="32" count="15" type="stmt"/>
+        <line num="34" count="15" type="stmt"/>
+        <line num="35" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="43" count="14" type="cond" truecount="1" falsecount="1"/>
+        <line num="44" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="4" type="stmt"/>
+        <line num="52" count="10" type="cond" truecount="6" falsecount="0"/>
+        <line num="53" count="3" type="stmt"/>
+        <line num="61" count="7" type="stmt"/>
+        <line num="62" count="7" type="stmt"/>
+        <line num="73" count="7" type="cond" truecount="4" falsecount="0"/>
+        <line num="74" count="15" type="stmt"/>
+        <line num="76" count="7" type="stmt"/>
+        <line num="78" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="80" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="86" count="0" type="stmt"/>
+        <line num="92" count="0" type="stmt"/>
+        <line num="101" count="1" type="stmt"/>
+      </file>
+      <file name="idea-service.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/services/idea-service.ts">
+        <metrics statements="54" coveredstatements="21" conditionals="22" coveredconditionals="8" methods="8" coveredmethods="4"/>
+        <line num="23" count="4" type="stmt"/>
+        <line num="24" count="4" type="stmt"/>
+        <line num="25" count="3" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="38" count="3" type="stmt"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="40" count="2" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="68" count="5" type="stmt"/>
+        <line num="69" count="5" type="stmt"/>
+        <line num="70" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="71" count="1" type="stmt"/>
+        <line num="78" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="79" count="1" type="stmt"/>
+        <line num="85" count="2" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="98" count="2" type="stmt"/>
+        <line num="99" count="2" type="stmt"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="119" count="0" type="stmt"/>
+        <line num="121" count="0" type="stmt"/>
+        <line num="122" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="123" count="0" type="stmt"/>
+        <line num="130" count="0" type="stmt"/>
+        <line num="131" count="0" type="stmt"/>
+        <line num="133" count="0" type="stmt"/>
+        <line num="152" count="0" type="stmt"/>
+        <line num="153" count="0" type="stmt"/>
+        <line num="154" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="155" count="0" type="stmt"/>
+        <line num="158" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="159" count="0" type="stmt"/>
+        <line num="162" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="163" count="0" type="stmt"/>
+        <line num="166" count="0" type="stmt"/>
+        <line num="174" count="0" type="stmt"/>
+        <line num="176" count="0" type="stmt"/>
+        <line num="184" count="0" type="stmt"/>
+        <line num="185" count="0" type="stmt"/>
+        <line num="186" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="187" count="0" type="stmt"/>
+        <line num="189" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="190" count="0" type="stmt"/>
+        <line num="192" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="193" count="0" type="stmt"/>
+        <line num="195" count="0" type="stmt"/>
+        <line num="196" count="0" type="stmt"/>
+        <line num="198" count="0" type="stmt"/>
+        <line num="203" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="types">
+      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+      <file name="result.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/types/result.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <line num="17" count="24" type="stmt"/>
+        <line num="21" count="24" type="stmt"/>
+        <line num="28" count="2" type="stmt"/>
+        <line num="32" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="utils">
+      <metrics statements="30" coveredstatements="19" conditionals="20" coveredconditionals="14" methods="7" coveredmethods="4"/>
+      <file name="api-error.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/utils/api-error.ts">
+        <metrics statements="11" coveredstatements="1" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="14" count="0" type="stmt"/>
+        <line num="19" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="27" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="41" count="3" type="stmt"/>
+      </file>
+      <file name="file.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/utils/file.ts">
+        <metrics statements="19" coveredstatements="18" conditionals="16" coveredconditionals="14" methods="5" coveredmethods="4"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="57" count="29" type="cond" truecount="2" falsecount="0"/>
+        <line num="59" count="29" type="cond" truecount="4" falsecount="0"/>
+        <line num="60" count="17" type="stmt"/>
+        <line num="63" count="12" type="cond" truecount="2" falsecount="0"/>
+        <line num="64" count="6" type="stmt"/>
+        <line num="65" count="6" type="stmt"/>
+        <line num="68" count="6" type="stmt"/>
+        <line num="72" count="7" type="stmt"/>
+        <line num="73" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="77" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="81" count="15" type="stmt"/>
+        <line num="82" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="90" count="5" type="stmt"/>
+        <line num="91" count="5" type="stmt"/>
+        <line num="92" count="5" type="stmt"/>
+        <line num="93" count="5" type="stmt"/>
+        <line num="94" count="5" type="cond" truecount="2" falsecount="0"/>
+      </file>
+    </package>
+    <package name="validations">
+      <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="auth.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/validations/auth.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+      </file>
+      <file name="evaluation.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/validations/evaluation.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="9" count="2" type="stmt"/>
+      </file>
+      <file name="idea.ts" path="/Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/lib/validations/idea.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

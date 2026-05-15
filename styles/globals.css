@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply border-border;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-background text-text;
+  font-feature-settings: "rounding" 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--tw-bg-opacity) inset !important;
+}
