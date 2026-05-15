@@ -58,19 +58,6 @@ InnovatEPAM Portal is an internal web application where employees submit innovat
 
 ---
 
-## Transformation Reflection
-
-### Before (Module 01)
-<!-- TODO: Fill in manually — how did you work before this course? (e.g. write code first, test maybe never, no specs, vibe-driven, fix bugs reactively) -->
-
-### After (Module 08)
-<!-- TODO: Fill in manually — how has your approach changed? (e.g. spec → test → implement → commit cycle, AI as a collaborator not a crutch, deliberate design before code) -->
-
-### Key Learning
-<!-- TODO: Fill in manually — one honest takeaway from the course -->
-
----
-
-**Author**: [Your Name]
+**Author**: Enver Bugrahan Alyuz
 **Date**: 2026-05-15
 **Course**: A201 - Beyond Vibe Coding
