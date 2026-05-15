@@ -4,7 +4,7 @@
 
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
-import { parseIdeaDescription, getMetadataLabel } from '@/lib/utils/idea-metadata'
+import { getMetadataLabel } from '@/lib/utils/idea-metadata'
 import { STATUS_LABELS, STATUS_FULL_LABELS } from '@/lib/utils/status'
 import Breadcrumb from '@/components/ui/breadcrumb'
 import StatusBadge from '@/components/ui/status-badge'
@@ -28,7 +28,8 @@ export default async function AdminIdeaDetailPage({
   }
 
   // Parse description to extract metadata
-  const { description, metadata } = parseIdeaDescription(idea.description)
+  const description = idea.description
+  const metadata = idea.categoryMetadata ? JSON.parse(idea.categoryMetadata) : null
   const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
   const latestEvaluation = Array.isArray(idea.evaluations) && idea.evaluations.length > 0 ? idea.evaluations[0] : null
   const isFinalDecision = idea.status === 'ACCEPTED' || idea.status === 'REJECTED'

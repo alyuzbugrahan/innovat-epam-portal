@@ -131,7 +131,8 @@ export class IdeaRepository {
     category: string,
     submitterId: string,
     blindReview: boolean = false,
-    status: string = 'SUBMITTED'
+    status: string = 'SUBMITTED',
+    categoryMetadata?: string | null
   ): Promise<Idea> {
     return prisma.idea.create({
       data: {
@@ -141,6 +142,7 @@ export class IdeaRepository {
         submitterId,
         blindReview,
         status,
+        categoryMetadata: categoryMetadata ?? null,
       },
     })
   }
@@ -151,6 +153,7 @@ export class IdeaRepository {
       title: string
       description: string
       category: string
+      categoryMetadata?: string | null
       blindReview?: boolean
       status: string
     }

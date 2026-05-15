@@ -42,7 +42,7 @@ interface IdeaFormInitialValues {
   description: string
   category: string
   blindReview?: boolean
-  metadata?: Record<string, string | undefined>
+  categoryMetadata?: string | null
   existingAttachments?: ExistingAttachment[]
 }
 
@@ -138,19 +138,13 @@ export default function IdeaForm({
     const selectedCategory = formData.get('category') as string
     const shouldBlindReview = formData.get('blindReview') === 'on'
 
-    // Add extra field metadata to description if it exists
-    const extraFieldName = Object.keys(CATEGORY_FIELDS).find(
-      (key) => key === selectedCategory
-    )
-    if (extraFieldName) {
-      const fieldConfig = CATEGORY_FIELDS[extraFieldName]
-      const extraFieldValue = formData.get(fieldConfig.name) as string
-
+    // Build structured categoryMetadata for the selected category
+    let categoryMetadata: string | null = null
+    const extraFieldConfig = CATEGORY_FIELDS[selectedCategory]
+    if (extraFieldConfig) {
+      const extraFieldValue = formData.get(extraFieldConfig.name) as string
       if (extraFieldValue?.trim()) {
-        // Append metadata as JSON to the description
-        description += `\n\n---METADATA---\n${JSON.stringify({
-          [fieldConfig.name]: extraFieldValue,
-        })}`
+        categoryMetadata = JSON.stringify({ [extraFieldConfig.name]: extraFieldValue })
       }
     }
 
@@ -172,6 +166,7 @@ export default function IdeaForm({
             category: selectedCategory,
             blindReview: shouldBlindReview,
             status: targetStatus,
+            categoryMetadata,
           }),
         })
 
@@ -193,6 +188,7 @@ export default function IdeaForm({
             category: selectedCategory,
             blindReview: shouldBlindReview,
             status: targetStatus,
+            categoryMetadata,
           }),
         })
 
@@ -347,7 +343,11 @@ export default function IdeaForm({
               name={extraField.name}
               required
               disabled={loading}
-              defaultValue={initialValues?.metadata?.[extraField.name] || ''}
+              defaultValue={
+                initialValues?.categoryMetadata
+                  ? (() => { try { return JSON.parse(initialValues.categoryMetadata)?.[extraField.name] || '' } catch { return '' } })()
+                  : ''
+              }
               placeholder={extraField.placeholder}
               maxLength={200}
               className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white disabled:bg-surface-dark"

@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, description, category, blindReview, status } = validationResult.data
+    const { title, description, category, blindReview, status, categoryMetadata } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create idea
-    const result = await ideaService.createIdea(title, description, category, user.id, blindReview, status)
+    const result = await ideaService.createIdea(title, description, category, user.id, blindReview, status, categoryMetadata)
 
     if (!result.ok) {
       const statusCode = result.error.code === ERROR_CODES.INTERNAL_ERROR ? 500 : 400

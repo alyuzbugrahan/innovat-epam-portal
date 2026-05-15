@@ -69,7 +69,7 @@ export async function PATCH(
       )
     }
 
-    const { title, description, category, blindReview, status } = validationResult.data
+    const { title, description, category, blindReview, status, categoryMetadata } = validationResult.data
     const session = authResult.data
     const user = session.user as any
 
@@ -80,7 +80,8 @@ export async function PATCH(
       description,
       category,
       blindReview,
-      status
+      status,
+      categoryMetadata
     )
 
     if (!result.ok) {

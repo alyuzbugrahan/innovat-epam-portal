@@ -19,6 +19,10 @@ export const createIdeaSchema = z.object({
     .string()
     .min(1, { message: 'Category is required' })
     .max(100, { message: 'Category must be at most 100 characters' }),
+  categoryMetadata: z
+    .string()
+    .max(500, { message: 'Category details must be at most 500 characters' })
+    .nullish(),
   blindReview: z.coerce.boolean().optional().default(false),
   status: draftStatusSchema.optional().default('SUBMITTED'),
 })
@@ -36,6 +40,10 @@ export const updateDraftIdeaSchema = z.object({
     .string()
     .min(1, { message: 'Category is required' })
     .max(100, { message: 'Category must be at most 100 characters' }),
+  categoryMetadata: z
+    .string()
+    .max(500, { message: 'Category details must be at most 500 characters' })
+    .nullish(),
   blindReview: z.coerce.boolean().optional(),
   status: draftStatusSchema,
 })

@@ -16,6 +16,7 @@ export interface Idea {
   title: string
   description: string
   category: string
+  categoryMetadata: string | null
   blindReview: boolean
   status: IdeaStatus
   submitterId: string

@@ -33,6 +33,7 @@ model Idea {
   submitter        User         @relation(fields: [submitterId], references: [id], onDelete: Cascade)
   attachments      IdeaAttachment[]
   evaluations      Evaluation[]
+  categoryMetadata String?      // JSON: structured extra field per category (Phase 2)
   currentComment   String?
   reviewedAt       DateTime?
   createdAt        DateTime     @default(now())

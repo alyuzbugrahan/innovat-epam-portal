@@ -4,7 +4,6 @@
 
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
-import { parseIdeaDescription } from '@/lib/utils/idea-metadata'
 import { notFound } from 'next/navigation'
 import IdeaForm from '@/components/forms/idea-form'
 import Breadcrumb from '@/components/ui/breadcrumb'
@@ -28,7 +27,7 @@ export default async function EditDraftPage({
     notFound()
   }
 
-  const { description, metadata } = parseIdeaDescription(idea.description)
+  const { description, metadata } = { description: idea.description, metadata: idea.categoryMetadata }
 
   return (
     <div className="min-h-screen bg-surface">
@@ -49,7 +48,7 @@ export default async function EditDraftPage({
               description,
               category: idea.category,
               blindReview: idea.blindReview,
-              metadata: metadata || undefined,
+              categoryMetadata: metadata || undefined,
               existingAttachments: idea.attachments.map((a) => ({
                 id: a.id,
                 originalName: a.originalName,

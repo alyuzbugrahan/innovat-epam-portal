@@ -5,7 +5,7 @@
 import { requireAuth } from '@/lib/auth/guards'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
 import { formatDateTime } from '@/lib/utils/dates'
-import { parseIdeaDescription, getMetadataLabel } from '@/lib/utils/idea-metadata'
+import { getMetadataLabel } from '@/lib/utils/idea-metadata'
 import { STATUS_FULL_LABELS } from '@/lib/utils/status'
 import Breadcrumb from '@/components/ui/breadcrumb'
 import NavBar from '@/components/layout/navbar'
@@ -28,7 +28,8 @@ export default async function IdeaDetailPage({
   }
 
   // Parse description to extract metadata
-  const { description, metadata } = parseIdeaDescription(idea.description)
+  const description = idea.description
+  const metadata = idea.categoryMetadata ? JSON.parse(idea.categoryMetadata) : null
   const attachments = Array.isArray(idea.attachments) ? idea.attachments : []
   const latestScoredEvaluation = Array.isArray(idea.evaluations)
     ? idea.evaluations.find((evaluation) => evaluation.score != null)
