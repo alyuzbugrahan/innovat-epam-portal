@@ -1,9 +1,14 @@
 {
   "pages": {
-    "/ideas/drafts/page": [
+    "/ideas/[ideaId]/edit/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/ideas/drafts/page.js"
+      "static/chunks/app/ideas/[ideaId]/edit/page.js"
+    ],
+    "/ideas/[ideaId]/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/loading.js"
     ],
     "/ideas/loading": [
       "static/chunks/webpack.js",
@@ -21,25 +26,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
+    "/(auth)/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(auth)/login/page.js"
+    ],
     "/ideas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/ideas/page.js"
-    ],
-    "/ideas/[ideaId]/edit/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/edit/page.js"
-    ],
-    "/ideas/[ideaId]/loading": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/loading.js"
-    ],
-    "/ideas/new/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/new/page.js"
     ],
     "/admin/ideas/page": [
       "static/chunks/webpack.js",
@@ -50,6 +45,21 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/admin/ideas/loading.js"
+    ],
+    "/admin/ideas/[ideaId]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/ideas/[ideaId]/page.js"
+    ],
+    "/ideas/drafts/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/drafts/page.js"
+    ],
+    "/ideas/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/new/page.js"
     ]
   }
 }
