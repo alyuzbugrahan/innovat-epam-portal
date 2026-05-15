@@ -1,30 +1,15 @@
 {
   "pages": {
-    "/ideas/[ideaId]/edit/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/edit/page.js"
-    ],
-    "/ideas/[ideaId]/loading": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/[ideaId]/loading.js"
-    ],
-    "/ideas/loading": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/loading.js"
+      "static/chunks/app/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
     ],
     "/(auth)/login/page": [
       "static/chunks/webpack.js",
@@ -35,6 +20,31 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/ideas/page.js"
+    ],
+    "/ideas/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/loading.js"
+    ],
+    "/ideas/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/new/page.js"
+    ],
+    "/ideas/drafts/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/drafts/page.js"
+    ],
+    "/ideas/[ideaId]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/page.js"
+    ],
+    "/ideas/[ideaId]/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/ideas/[ideaId]/loading.js"
     ],
     "/admin/ideas/page": [
       "static/chunks/webpack.js",
@@ -50,16 +60,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/admin/ideas/[ideaId]/page.js"
-    ],
-    "/ideas/drafts/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/drafts/page.js"
-    ],
-    "/ideas/new/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/ideas/new/page.js"
     ]
   }
 }

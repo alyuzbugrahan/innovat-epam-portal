@@ -1,8 +1,8 @@
-// File: /Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/app/ideas/[ideaId]/edit/page.tsx
-import * as entry from '../../../../../../app/ideas/[ideaId]/edit/page.js'
+// File: /Users/bugra/Documents/AI_Bootcamp/innovat-epam-portal/innovat-epam-portal/app/ideas/[ideaId]/page.tsx
+import * as entry from '../../../../../app/ideas/[ideaId]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../../app/ideas/[ideaId]/edit/page.js')
+type TEntry = typeof import('../../../../../app/ideas/[ideaId]/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

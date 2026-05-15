@@ -8,7 +8,7 @@ InnovatEPAM Portal is an internal web application where employees submit innovat
 ### MVP Features
 - [x] **User Authentication** - Register, login, logout with bcrypt-hashed passwords and NextAuth v5 session management; two roles (SUBMITTER, ADMIN) enforced server-side
 - [x] **Idea Submission** - Authenticated submitters can create ideas with title, description, and category via a validated form; ideas initialise with status `SUBMITTED`
-- [x] **File Attachment** - Single file per idea, max 10 MB, server-side MIME-type whitelist (images, PDF, Office docs, video, audio); stored in `public/uploads`
+- [x] **File Attachment** - Multiple attachments per idea, max 10 MB each, server-side MIME-type whitelist (images, PDF, Office docs, video, audio); stored in `public/uploads`; individual attachments can be removed from drafts via `DELETE /api/ideas/[id]/attachments/[attachmentId]`
 - [x] **Idea Listing & Viewing** - Submitters see only their own ideas with current status badges; admins see the full queue; both have dedicated detail pages with evaluation history
 - [x] **Evaluation Workflow** - Strict state-machine pipeline enforced in `EvaluationService`; mandatory comment required for `ACCEPTED`/`REJECTED` decisions; every transition stored as an immutable audit record
 
@@ -79,6 +79,32 @@ InnovatEPAM Portal is an internal web application where employees submit innovat
 - **Git commits**: 14
 - **Source files**: 70 TypeScript / TSX files (~5,041 lines, excluding tests, migrations, node_modules)
 - **Test files**: 10 files in `tests/lib/` (services, validations, utils)
+
+## Transformation Reflection
+
+### Before (Module 01)
+I approached development by jumping straight into coding —
+writing features as I thought of them, adjusting requirements
+on the fly, and relying on AI tools to generate code without
+providing structured context. Prompts were vague and
+result-driven: "build me a login page."
+
+### After (Module 08)
+I now start every feature with a specification. Before writing
+a single line of code, I define user stories, acceptance
+criteria, functional requirements, and edge cases in a
+structured spec. AI tools receive this spec as context, which
+produces significantly more accurate and consistent output.
+I also document architecture decisions as ADRs so that every
+non-obvious technical choice has a recorded rationale.
+
+### Key Learning
+The quality of AI-generated code is directly proportional to
+the quality of the specification you provide. Vague prompts
+produce generic code; structured specs with clear constraints,
+user stories, and architecture decisions produce code that
+actually fits the system. Specification is not overhead —
+it is the work.
 
 ---
 
