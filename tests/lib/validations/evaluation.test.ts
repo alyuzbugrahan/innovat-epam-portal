@@ -5,11 +5,11 @@
  * FR-017: System MUST allow admins to set final decision status to either
  *         `accepted` or `rejected` with a written comment.
  *
- * NOTE — spec vs implementation discrepancy:
- *   The spec defines two statuses: UNDER_REVIEW, ACCEPTED, REJECTED.
- *   The implementation extends this to a 4-stage pipeline:
+ * NOTE — Phase 5 supersedes Phase 1 pipeline:
+ *   Phase 1 spec defines three statuses: UNDER_REVIEW, ACCEPTED, REJECTED.
+ *   Phase 5 (Multi-Stage Review) extends this to a 5-stage pipeline:
  *   SUBMITTED → INITIAL_SCREENING → TECHNICAL_REVIEW → BUSINESS_REVIEW → ACCEPTED | REJECTED.
- *   Tests validate the actual implementation schema.
+ *   The Phase 5 spec is authoritative; tests validate the actual implementation schema.
  *
  * Edge cases:
  * - Invalid toStatus value

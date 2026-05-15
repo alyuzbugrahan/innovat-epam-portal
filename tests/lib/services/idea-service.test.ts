@@ -34,8 +34,8 @@ vi.mock('@/lib/db/repositories/idea-repository', () => ({
     findAllWithFilters: vi.fn(),
     findBySubmitterWithFilters: vi.fn(),
     updateStatus: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
+    updateIdea: vi.fn(),
+    deleteById: vi.fn(),
   },
 }))
 
@@ -50,12 +50,17 @@ vi.mock('@/lib/db/repositories/attachment-repository', () => ({
 
 import { IdeaService } from '@/lib/services/idea-service'
 import { ideaRepository } from '@/lib/db/repositories/idea-repository'
+import { attachmentRepository } from '@/lib/db/repositories/attachment-repository'
 import { ERROR_CODES } from '@/lib/utils/api-error'
 
 const mockCreate = vi.mocked(ideaRepository.create)
 const mockFindBySubmitterId = vi.mocked(ideaRepository.findBySubmitterId)
+const mockFindDraftsBySubmitterId = vi.mocked(ideaRepository.findDraftsBySubmitterId)
 const mockFindById = vi.mocked(ideaRepository.findById)
 const mockFindAll = vi.mocked(ideaRepository.findAll)
+const mockUpdateIdea = vi.mocked(ideaRepository.updateIdea)
+const mockDeleteById = vi.mocked(ideaRepository.deleteById)
+const mockAttachmentCreate = vi.mocked(attachmentRepository.create)
 
 const SUBMITTER_ID = 'submitter-001'
 const OTHER_SUBMITTER_ID = 'submitter-002'
@@ -293,6 +298,333 @@ describe('IdeaService.getAllIdeas()', () => {
     mockFindAll.mockRejectedValue(new Error('DB error'))
 
     const result = await service.getAllIdeas()
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.INTERNAL_ERROR)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getSubmitterDrafts()
+// ---------------------------------------------------------------------------
+
+describe('IdeaService.getSubmitterDrafts()', () => {
+  let service: IdeaService
+
+  beforeEach(() => {
+    service = new IdeaService()
+    vi.clearAllMocks()
+  })
+
+  it('returns draft ideas belonging to the submitter', async () => {
+    const drafts = [
+      { ...MOCK_IDEA, id: 'draft-1', status: 'DRAFT' },
+      { ...MOCK_IDEA, id: 'draft-2', status: 'DRAFT' },
+    ]
+    mockFindDraftsBySubmitterId.mockResolvedValue(drafts as any)
+
+    const result = await service.getSubmitterDrafts(SUBMITTER_ID)
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data).toHaveLength(2)
+    }
+    expect(mockFindDraftsBySubmitterId).toHaveBeenCalledWith(SUBMITTER_ID)
+  })
+
+  it('returns an empty array when submitter has no drafts', async () => {
+    mockFindDraftsBySubmitterId.mockResolvedValue([])
+
+    const result = await service.getSubmitterDrafts(SUBMITTER_ID)
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data).toHaveLength(0)
+    }
+  })
+
+  it('returns INTERNAL_ERROR if repository throws', async () => {
+    mockFindDraftsBySubmitterId.mockRejectedValue(new Error('DB error'))
+
+    const result = await service.getSubmitterDrafts(SUBMITTER_ID)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.INTERNAL_ERROR)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// attachFile()
+// ---------------------------------------------------------------------------
+
+describe('IdeaService.attachFile()', () => {
+  let service: IdeaService
+
+  beforeEach(() => {
+    service = new IdeaService()
+    vi.clearAllMocks()
+  })
+
+  it('creates an attachment record when idea exists', async () => {
+    mockFindById.mockResolvedValue(MOCK_IDEA as any)
+    mockAttachmentCreate.mockResolvedValue(undefined as any)
+
+    const result = await service.attachFile(
+      IDEA_ID,
+      'design.pdf',
+      'uploads/design.pdf',
+      'application/pdf',
+      512000
+    )
+
+    expect(result.ok).toBe(true)
+    expect(mockAttachmentCreate).toHaveBeenCalledWith(
+      IDEA_ID,
+      'design.pdf',
+      'uploads/design.pdf',
+      'application/pdf',
+      512000
+    )
+  })
+
+  it('returns NOT_FOUND when idea does not exist', async () => {
+    mockFindById.mockResolvedValue(null)
+
+    const result = await service.attachFile(
+      'nonexistent-idea',
+      'file.pdf',
+      'uploads/file.pdf',
+      'application/pdf',
+      100
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.NOT_FOUND)
+    }
+    expect(mockAttachmentCreate).not.toHaveBeenCalled()
+  })
+
+  it('returns INTERNAL_ERROR if repository throws', async () => {
+    mockFindById.mockResolvedValue(MOCK_IDEA as any)
+    mockAttachmentCreate.mockRejectedValue(new Error('DB error'))
+
+    const result = await service.attachFile(
+      IDEA_ID,
+      'file.pdf',
+      'uploads/file.pdf',
+      'application/pdf',
+      100
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.INTERNAL_ERROR)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateDraftIdea()
+// ---------------------------------------------------------------------------
+
+describe('IdeaService.updateDraftIdea()', () => {
+  let service: IdeaService
+  const DRAFT_IDEA = { ...MOCK_IDEA, status: 'DRAFT' }
+
+  beforeEach(() => {
+    service = new IdeaService()
+    vi.clearAllMocks()
+  })
+
+  it('updates and returns the draft idea on success', async () => {
+    const updated = { ...DRAFT_IDEA, title: 'Updated Title' }
+    mockFindById.mockResolvedValue(DRAFT_IDEA as any)
+    mockUpdateIdea.mockResolvedValue(updated as any)
+
+    const result = await service.updateDraftIdea(
+      IDEA_ID,
+      SUBMITTER_ID,
+      'Updated Title',
+      'Updated description.',
+      'Engineering',
+      false,
+      'DRAFT'
+    )
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.title).toBe('Updated Title')
+    }
+    expect(mockUpdateIdea).toHaveBeenCalledWith(
+      IDEA_ID,
+      expect.objectContaining({ title: 'Updated Title', status: 'DRAFT' })
+    )
+  })
+
+  it('submits the draft (status SUBMITTED) when requested', async () => {
+    const submitted = { ...DRAFT_IDEA, status: 'SUBMITTED' }
+    mockFindById.mockResolvedValue(DRAFT_IDEA as any)
+    mockUpdateIdea.mockResolvedValue(submitted as any)
+
+    const result = await service.updateDraftIdea(
+      IDEA_ID,
+      SUBMITTER_ID,
+      'Final Title',
+      'Final description.',
+      'Engineering',
+      false,
+      'SUBMITTED'
+    )
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.status).toBe('SUBMITTED')
+    }
+  })
+
+  it('returns NOT_FOUND when idea does not exist', async () => {
+    mockFindById.mockResolvedValue(null)
+
+    const result = await service.updateDraftIdea(
+      'nonexistent',
+      SUBMITTER_ID,
+      'Title',
+      'Desc.',
+      'Cat',
+      false,
+      'DRAFT'
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.NOT_FOUND)
+    }
+  })
+
+  it('returns FORBIDDEN when submitter does not own the idea', async () => {
+    mockFindById.mockResolvedValue(DRAFT_IDEA as any)
+
+    const result = await service.updateDraftIdea(
+      IDEA_ID,
+      OTHER_SUBMITTER_ID,
+      'Title',
+      'Desc.',
+      'Cat',
+      false,
+      'DRAFT'
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.FORBIDDEN)
+    }
+  })
+
+  it('returns CONFLICT when idea is not in DRAFT status', async () => {
+    mockFindById.mockResolvedValue({ ...MOCK_IDEA, status: 'SUBMITTED' } as any)
+
+    const result = await service.updateDraftIdea(
+      IDEA_ID,
+      SUBMITTER_ID,
+      'Title',
+      'Desc.',
+      'Cat',
+      false,
+      'DRAFT'
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.CONFLICT)
+    }
+  })
+
+  it('returns INTERNAL_ERROR if repository throws', async () => {
+    mockFindById.mockRejectedValue(new Error('DB error'))
+
+    const result = await service.updateDraftIdea(
+      IDEA_ID,
+      SUBMITTER_ID,
+      'Title',
+      'Desc.',
+      'Cat',
+      false,
+      'DRAFT'
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.INTERNAL_ERROR)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// deleteIdea()
+// ---------------------------------------------------------------------------
+
+describe('IdeaService.deleteIdea()', () => {
+  let service: IdeaService
+  const DRAFT_IDEA = { ...MOCK_IDEA, status: 'DRAFT' }
+
+  beforeEach(() => {
+    service = new IdeaService()
+    vi.clearAllMocks()
+  })
+
+  it('deletes the draft idea on success', async () => {
+    mockFindById.mockResolvedValue(DRAFT_IDEA as any)
+    mockDeleteById.mockResolvedValue(undefined as any)
+
+    const result = await service.deleteIdea(IDEA_ID, SUBMITTER_ID)
+
+    expect(result.ok).toBe(true)
+    expect(mockDeleteById).toHaveBeenCalledWith(IDEA_ID)
+  })
+
+  it('returns NOT_FOUND when idea does not exist', async () => {
+    mockFindById.mockResolvedValue(null)
+
+    const result = await service.deleteIdea('nonexistent', SUBMITTER_ID)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.NOT_FOUND)
+    }
+    expect(mockDeleteById).not.toHaveBeenCalled()
+  })
+
+  it('returns FORBIDDEN when submitter does not own the idea', async () => {
+    mockFindById.mockResolvedValue(DRAFT_IDEA as any)
+
+    const result = await service.deleteIdea(IDEA_ID, OTHER_SUBMITTER_ID)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.FORBIDDEN)
+    }
+  })
+
+  it('returns CONFLICT when idea is not a draft', async () => {
+    mockFindById.mockResolvedValue({ ...MOCK_IDEA, status: 'SUBMITTED' } as any)
+
+    const result = await service.deleteIdea(IDEA_ID, SUBMITTER_ID)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe(ERROR_CODES.CONFLICT)
+    }
+  })
+
+  it('returns INTERNAL_ERROR if repository throws', async () => {
+    mockFindById.mockRejectedValue(new Error('DB error'))
+
+    const result = await service.deleteIdea(IDEA_ID, SUBMITTER_ID)
 
     expect(result.ok).toBe(false)
     if (!result.ok) {

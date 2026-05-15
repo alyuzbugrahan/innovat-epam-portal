@@ -5,8 +5,8 @@
 ![Next.js](https://img.shields.io/badge/Next.js-14.2-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript)
 ![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma)
-![Tests](https://img.shields.io/badge/tests-120%20passing-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-64%25-yellow)
+![Tests](https://img.shields.io/badge/tests-163%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)
 
 ---
 
@@ -16,6 +16,7 @@
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
+- [Spec-Driven Development](#spec-driven-development)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [Database Setup](#database-setup)
@@ -99,6 +100,48 @@ components/
 ```
 
 The application follows a strict layered architecture: **Pages → Services → Repositories → Prisma**. No page or route handler queries the database directly.
+
+---
+
+## Spec-Driven Development
+
+This project was built following the **GitHub SpecKit** Spec-Driven Development (SDD) workflow. Specs were written before code; every implementation decision traces back to a documented artifact.
+
+### Workflow
+
+```
+/speckit.constitution  →  /speckit.specify  →  /speckit.plan  →  /speckit.tasks
+        ↓                       ↓                    ↓                 ↓
+  Principles &           User stories &         Tech stack &      Numbered task
+  tech guardrails        acceptance criteria    dependencies      list by story
+                                ↓
+                    Implement → Test → Commit
+```
+
+### Artifacts Produced
+
+| Artifact | Path | Purpose |
+|---|---|---|
+| `constitution.md` | `.specify/memory/constitution.md` | Coding principles, security rules, approved stack |
+| `spec.md` | `specs/005-innovation-portal/spec.md` | 4 user stories (US1–US4), 20 FRs, acceptance scenarios |
+| `plan.md` | `specs/005-innovation-portal/plan.md` | Tech stack choices with version justification |
+| `data-model.md` | `specs/005-innovation-portal/data-model.md` | Entity definitions and field constraints |
+| `research.md` | `specs/005-innovation-portal/research.md` | Technology options and trade-offs |
+| `tasks.md` | `specs/005-innovation-portal/tasks.md` | Numbered task list (T001–T0xx) grouped by user story |
+| Phase 2 spec | `specs/005-innovation-portal/phase-02-smart-forms/` | Smart forms spec, plan, and tasks |
+| ADRs | `docs/adr/` | 3 Architecture Decision Records for key tech choices |
+
+### Spec → Code Traceability
+
+Every test file opens with a header citing the spec path, user story, and the FR numbers it validates:
+
+```ts
+// Spec: /specs/005-innovation-portal/spec.md
+// User Story 2 — Submit and Track Ideas (P1)
+// FR-006, FR-007, FR-011, FR-012, FR-013, FR-014
+```
+
+The 5-stage pipeline is the Phase 5 (Multi-Stage Review) implementation — it supersedes the Phase 1 3-stage model. When phases build on each other, the latest phase spec is authoritative.
 
 ---
 
@@ -192,13 +235,14 @@ npm run test:coverage
 |---|---|---|---|
 | `services/auth-service.ts` | 100% | 100% | 100% |
 | `services/evaluation-service.ts` | 80% | 62.5% | 100% |
-| `services/idea-service.ts` | 38.88% | 36.36% | 50% |
+| `services/idea-service.ts` | 100% | 100% | 100% |
 | `types/result.ts` | 100% | 100% | 100% |
+| `utils/api-error.ts` | 100% | 100% | 100% |
 | `utils/file.ts` | 94.73% | 87.5% | 80% |
 | `validations/*` | 100% | 100% | 100% |
-| **Overall** | **64.17%** | — | — |
+| **Overall** | **96.26%** | **84.72%** | **95.65%** |
 
-120 tests / 120 passing / 0 skipped
+163 tests / 163 passing / 0 skipped
 
 ---
 

@@ -10,16 +10,17 @@
  *   AC3: Admin evaluates an idea → can set ACCEPTED or REJECTED with written comment.
  *   AC4: Non-admin submitter attempting admin actions → access denied (guard/middleware level).
  *
- * FR-016: Allow admins to set idea status to `under_review` (INITIAL_SCREENING in implementation).
+ * FR-016: Allow admins to advance idea status (INITIAL_SCREENING is the first step).
  * FR-017: Allow admins to set final decision ACCEPTED or REJECTED with written comment.
  * FR-019: Enforce role-based authorization on all routes (guard/middleware level, not here).
  *
- * NOTE — spec vs implementation discrepancy:
- *   The spec defines the lifecycle as:
+ * NOTE — Phase 5 supersedes Phase 1 pipeline:
+ *   Phase 1 spec defines a 3-stage lifecycle:
  *     SUBMITTED → UNDER_REVIEW → ACCEPTED | REJECTED
- *   The implementation uses an extended 4-stage pipeline:
+ *   Phase 5 (Multi-Stage Review) extends this to 5 stages:
  *     SUBMITTED → INITIAL_SCREENING → TECHNICAL_REVIEW → BUSINESS_REVIEW → ACCEPTED | REJECTED
- *   All tests validate the actual VALID_TRANSITIONS map in evaluation-service.ts.
+ *   The Phase 5 spec is authoritative; all tests validate the VALID_TRANSITIONS map
+ *   in evaluation-service.ts which reflects the final phase specification.
  *
  * Edge cases:
  * - Skipping a pipeline stage (e.g. SUBMITTED → ACCEPTED) → INVALID_TRANSITION.
