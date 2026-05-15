@@ -58,6 +58,6 @@ InnovatEPAM Portal is an internal web application where employees submit innovat
 
 ---
 
-**Author**: Enver Bugrahan Alyuz
+**Author**: alyuzbugrahan
 **Date**: 2026-05-15
 **Course**: A201 - Beyond Vibe Coding
